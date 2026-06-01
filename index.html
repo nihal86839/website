@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="gamer">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NihalZone — Gaming & Hacking Hub</title>
+  <meta name="description" content="NihalZone — Your ultimate destination for games, hacking tools, videos, music, and more!">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+  <canvas id="matrixCanvas" class="matrix-canvas"></canvas>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <div class="logo-icon">⚡</div>
+      NIHALZONE
+    </a>
+    <ul class="navbar-nav">
+      <li><a href="index.html" class="nav-link active">🏠 Home</a></li>
+      <li><a href="games.html" class="nav-link">🎮 Games</a>
+    <a href="online_games.html" class="nav-link">🕹 Play Online</a></li>
+      <li><a href="online_games.html" class="nav-link">🕹 Play Online</a></li>
+      <li><a href="tools.html" class="nav-link">🔧 Tools</a></li>
+      <li><a href="terminal.html" class="nav-link">💻 Terminal</a></li>
+      <li><a href="videos.html" class="nav-link">🎬 Videos</a></li>
+      <li><a href="photos.html" class="nav-link">🖼 Photos</a></li>
+      <li><a href="songs.html" class="nav-link">🎵 Songs</a></li>
+      <li><a href="chat.html" class="nav-link">💬 Chat</a></li>
+      <li data-admin="true" class="hidden"><a href="admin.html" class="nav-link neon-text-secondary">⚙ Admin</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <div class="theme-toggle">
+        <button class="theme-btn" data-theme="gamer">🎮</button>
+        <button class="theme-btn" data-theme="hacker">💻</button>
+        <button class="theme-btn" data-theme="light">☀️</button>
+      </div>
+      <!-- Guest -->
+      <a href="login.html" class="btn btn-outline btn-sm" data-auth="false">Login</a>
+      <a href="signup.html" class="btn btn-primary btn-sm" data-auth="false">Sign Up</a>
+      <!-- Logged In -->
+      <div data-auth="true" class="hidden" style="display:flex;align-items:center;gap:8px;">
+        <div class="user-dropdown-container" id="profileDropdownContainer">
+          <div style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:4px;" id="profileDropdownToggle">
+            <div class="user-avatar" id="navUserAvatar" style="width:32px;height:32px;font-size:0.8rem;border-radius:8px;background:var(--gradient-primary);display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;overflow:hidden;">U</div>
+            <span id="navUserName" style="font-family:var(--font-heading);font-size:0.75rem;"></span>
+            <span>▼</span>
+          </div>
+          <div class="user-dropdown-menu">
+            <button class="dropdown-item" onclick="openProfileModal()">⚙️ Edit Profile</button>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item" data-action="logout" style="color:var(--color-secondary);">🚪 Logout</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button class="hamburger" id="hamburger">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- Mobile Nav -->
+  <div class="mobile-nav" id="mobileNav">
+    <a href="index.html" class="nav-link">🏠 Home</a>
+    <a href="games.html" class="nav-link">🎮 Games</a>
+    <a href="online_games.html" class="nav-link">🕹 Play Online</a>
+    <a href="tools.html" class="nav-link">🔧 Hacking Tools</a>
+    <a href="videos.html" class="nav-link">🎬 Videos</a>
+    <a href="photos.html" class="nav-link">🖼 Photos</a>
+    <a href="songs.html" class="nav-link">🎵 Songs</a>
+    <a href="chat.html" class="nav-link">💬 Chat</a>
+    <a href="admin.html" class="nav-link" data-admin="true">⚙ Admin Panel</a>
+    <div style="display:flex;gap:10px;margin-top:8px;">
+      <a href="login.html" class="btn btn-outline btn-sm" data-auth="false">Login</a>
+      <a href="signup.html" class="btn btn-primary btn-sm" data-auth="false">Sign Up</a>
+      <button class="btn btn-outline btn-sm" data-action="logout" data-auth="true">Logout</button>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <section class="hero" style="padding-top:64px;">
+    <div class="grid-bg"></div>
+    <div id="particles" class="particles"></div>
+    <div class="hero-content">
+      <div class="badge badge-primary" style="margin:0 auto 20px;display:inline-flex;">⚡ WELCOME TO THE ZONE</div>
+      <h1>
+        <span class="gradient-text">NIHAL</span><span style="color:var(--color-text)">ZONE</span><br>
+        <span style="font-size:0.5em;color:var(--color-text-muted);font-weight:400;">GAME. HACK. DOMINATE.</span>
+      </h1>
+      <p>Your ultimate hub for games, ethical hacking tools, exclusive videos, music, and a live community chat. Join thousands of users in the zone.</p>
+      <div class="hero-actions">
+        <a href="games.html" class="btn btn-primary btn-lg">🎮 Explore Games</a>
+        <a href="tools.html" class="btn btn-outline btn-lg">🔧 Hacking Tools</a>
+        <a href="signup.html" class="btn btn-secondary btn-lg" id="heroSignupBtn">⚡ Join Now</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS BAR -->
+  <div class="stats-bar" id="statsBar">
+    <div class="stat-item">
+      <span class="stat-number" id="statUsers">0</span>
+      <span class="stat-label">Members</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-number" id="statGames">0</span>
+      <span class="stat-label">Games</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-number" id="statTools">0</span>
+      <span class="stat-label">Tools</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-number" id="statVideos">0</span>
+      <span class="stat-label">Videos</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-number" id="statMessages">0</span>
+      <span class="stat-label">Messages</span>
+    </div>
+  </div>
+
+  <!-- CATEGORIES -->
+  <section class="section">
+    <div class="container">
+      <div class="section-title">🗂 Browse Categories</div>
+      <div class="grid grid-3" id="categoryGrid" style="grid-template-columns:repeat(auto-fill,minmax(180px,1fr));">
+        <a href="games.html" class="category-card">
+          <div class="category-icon">🎮</div>
+          <div class="category-name">Games</div>
+          <div class="category-count" id="catGamesCount">Loading...</div>
+        </a>
+        <a href="tools.html" class="category-card">
+          <div class="category-icon">🔧</div>
+          <div class="category-name">Hacking Tools</div>
+          <div class="category-count" id="catToolsCount">Loading...</div>
+        </a>
+        <a href="videos.html" class="category-card">
+          <div class="category-icon">🎬</div>
+          <div class="category-name">Videos</div>
+          <div class="category-count" id="catVideosCount">Loading...</div>
+        </a>
+        <a href="photos.html" class="category-card">
+          <div class="category-icon">🖼</div>
+          <div class="category-name">Photos</div>
+          <div class="category-count" id="catPhotosCount">Loading...</div>
+        </a>
+        <a href="songs.html" class="category-card">
+          <div class="category-icon">🎵</div>
+          <div class="category-name">Songs</div>
+          <div class="category-count" id="catSongsCount">Loading...</div>
+        </a>
+        <a href="chat.html" class="category-card">
+          <div class="category-icon">💬</div>
+          <div class="category-name">Live Chat</div>
+          <div class="category-count">Community</div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURED GAMES -->
+  <section class="section" style="padding-top:0">
+    <div class="container">
+      <div class="section-title">🎮 Featured Games</div>
+      <div class="grid grid-auto" id="featuredGames"></div>
+    </div>
+  </section>
+
+  <!-- FEATURED TOOLS -->
+  <section class="section" style="padding-top:0">
+    <div class="container">
+      <div class="section-title">🔧 Hacking Tools</div>
+      <div class="grid grid-auto" id="featuredTools"></div>
+    </div>
+  </section>
+
+  <!-- DONATE BTN -->
+  <button class="donate-btn" id="donateBtn">
+    💛 <span>Donate / Support</span>
+  </button>
+
+  <!-- SUPPORT BTN -->
+  <div style="position:fixed;bottom:80px;right:24px;z-index:500;">
+    <button class="btn btn-outline btn-sm" id="supportBtn" style="border-radius:20px;backdrop-filter:blur(10px);">
+      🎧 Support
+    </button>
+  </div>
+
+  <!-- FOOTER -->
+  <footer style="border-top:1px solid var(--color-border);padding:30px 20px;text-align:center;color:var(--color-text-muted);font-size:0.8rem;">
+    <div style="font-family:var(--font-heading);font-size:1.2rem;color:var(--color-primary);text-shadow:var(--glow-primary);margin-bottom:10px;">⚡ NIHALZONE</div>
+    <p>Built with ❤️ by Nihal | Game. Hack. Dominate.</p>
+    <div style="margin-top:12px;display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+      <a href="games.html" style="color:var(--color-text-muted);text-decoration:none;">Games</a>
+      <a href="tools.html" style="color:var(--color-text-muted);text-decoration:none;">Tools</a>
+      <a href="videos.html" style="color:var(--color-text-muted);text-decoration:none;">Videos</a>
+      <a href="chat.html" style="color:var(--color-text-muted);text-decoration:none;">Chat</a>
+    </div>
+  </footer>
+
+  <script src="js/core.js"></script>
+  <script>
+    // Update hero signup btn if logged in
+    window.addEventListener('DOMContentLoaded', () => {
+      if (NZ.isLoggedIn()) {
+        const btn = document.getElementById('heroSignupBtn');
+        if (btn) { btn.textContent = '🎮 My Dashboard'; btn.href = '#'; }
+      }
+
+      // Load stats
+      const stats = NZ.getStats();
+      document.getElementById('statUsers').textContent = stats.users;
+      document.getElementById('statGames').textContent = stats.games;
+      document.getElementById('statTools').textContent = stats.tools;
+      document.getElementById('statVideos').textContent = stats.videos;
+      document.getElementById('statMessages').textContent = stats.messages;
+
+      // Category counts
+      document.getElementById('catGamesCount').textContent = stats.games + ' available';
+      document.getElementById('catToolsCount').textContent = stats.tools + ' tools';
+      document.getElementById('catVideosCount').textContent = stats.videos + ' videos';
+      document.getElementById('catPhotosCount').textContent = stats.photos + ' photos';
+      document.getElementById('catSongsCount').textContent = stats.songs + ' songs';
+
+      // Featured Games
+      renderProductCards('featuredGames', NZ.getProducts('game').slice(0, 4));
+      renderProductCards('featuredTools', NZ.getProducts('tool').slice(0, 4));
+    });
+
+    function renderProductCards(containerId, products) {
+      const container = document.getElementById(containerId);
+      if (!products.length) {
+        container.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><h3>Nothing here yet</h3><p>Check back soon!</p></div>`;
+        return;
+      }
+      container.innerHTML = products.map(p => `
+        <div class="card">
+          ${p.imageUrl
+            ? `<img src="${p.imageUrl}" class="card-img" alt="${NZ.sanitize(p.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+               <div class="card-img-placeholder" style="display:none">${p.type === 'game' ? '🎮' : '🔧'}</div>`
+            : `<div class="card-img-placeholder">${p.type === 'game' ? '🎮' : p.type === 'tool' ? '🔧' : p.type === 'video' ? '🎬' : '📦'}</div>`}
+          <div class="card-body">
+            <div class="card-title">${NZ.sanitize(p.name)}</div>
+            <div class="card-desc">${NZ.sanitize(p.description)}</div>
+          </div>
+          <div class="card-footer">
+            <span class="price-tag ${p.price > 0 ? 'price-paid' : 'price-free'}">${NZ.formatPrice(p.price)}</span>
+            <button class="btn btn-primary btn-sm" onclick="handleProductAction('${p.id}')">
+              ${p.price > 0 ? '💳 Buy' : '⬇ Download'}
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+  </script>
+</body>
+</html>

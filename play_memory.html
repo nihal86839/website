@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="gamer">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memory Match — NihalZone</title>
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    .game-container { max-width: 500px; margin: 0 auto; padding: 20px; background: var(--bg-card); border: 1px solid var(--color-border); border-radius: 16px; box-shadow: var(--glow-primary); text-align: center; }
+    .board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 20px auto; }
+    .card { aspect-ratio: 3/4; background: var(--bg-secondary); border: 2px solid var(--color-border); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; cursor: pointer; transition: transform 0.3s; transform-style: preserve-3d; position: relative; }
+    .card .front, .card .back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; border-radius: 6px; }
+    .card .front { background: var(--bg-secondary); color: transparent; }
+    .card .back { background: var(--gradient-primary); color: white; transform: rotateY(180deg); }
+    .card.flipped { transform: rotateY(180deg); }
+    .card.matched { visibility: hidden; }
+    .stats { font-family: var(--font-heading); font-size: 1.2rem; margin-bottom: 20px; color: var(--color-text); }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand"><div class="logo-icon">⚡</div>NIHALZONE</a>
+    <div class="navbar-actions">
+      <a href="online_games.html" class="btn btn-outline btn-sm">Back</a>
+    </div>
+  </nav>
+
+  <div class="page-wrapper">
+    <div class="container" style="padding-top:20px;padding-bottom:80px;">
+      <div class="game-container">
+        <h2 style="color:var(--color-primary);font-family:var(--font-heading);margin-bottom:10px;">MEMORY MATCH</h2>
+        
+        <div class="stats">Moves: <span id="movesVal">0</span></div>
+
+        <div class="board" id="board"></div>
+
+        <button class="btn btn-primary" onclick="initGame()">🔄 Restart Game</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/core.js"></script>
+  <script>
+    NZ.initTheme();
+
+    const icons = ['🎮', '💻', '⚡', '🤖', '👾', '🚀', '🔮', '🕹'];
+    let cards = [];
+    let hasFlippedCard = false;
+    let lockBoard = false;
+    let firstCard, secondCard;
+    let moves = 0;
+    let matches = 0;
+
+    function initGame() {
+      const board = document.getElementById('board');
+      board.innerHTML = '';
+      moves = 0;
+      matches = 0;
+      document.getElementById('movesVal').textContent = moves;
+      hasFlippedCard = false;
+      lockBoard = false;
+      firstCard = null;
+      secondCard = null;
+
+      cards = [...icons, ...icons];
+      cards.sort(() => 0.5 - Math.random());
+
+      cards.forEach((icon, i) => {
+        const card = document.createElement('div');
+        card.classList.add('card');
+        card.dataset.icon = icon;
+        card.innerHTML = `
+          <div class="front">❓</div>
+          <div class="back">${icon}</div>
+        `;
+        card.addEventListener('click', flipCard);
+        board.appendChild(card);
+      });
+    }
+
+    function flipCard() {
+      if (lockBoard) return;
+      if (this === firstCard) return;
+
+      this.classList.add('flipped');
+
+      if (!hasFlippedCard) {
+        hasFlippedCard = true;
+        firstCard = this;
+        return;
+      }
+
+      secondCard = this;
+      moves++;
+      document.getElementById('movesVal').textContent = moves;
+      checkForMatch();
+    }
+
+    function checkForMatch() {
+      let isMatch = firstCard.dataset.icon === secondCard.dataset.icon;
+      isMatch ? disableCards() : unflipCards();
+    }
+
+    function disableCards() {
+      firstCard.removeEventListener('click', flipCard);
+      secondCard.removeEventListener('click', flipCard);
+      matches++;
+      
+      setTimeout(() => {
+        firstCard.classList.add('matched');
+        secondCard.classList.add('matched');
+        resetBoard();
+        if (matches === icons.length) {
+          alert(`You won in ${moves} moves! 🎉`);
+        }
+      }, 500);
+    }
+
+    function unflipCards() {
+      lockBoard = true;
+      setTimeout(() => {
+        firstCard.classList.remove('flipped');
+        secondCard.classList.remove('flipped');
+        resetBoard();
+      }, 1000);
+    }
+
+    function resetBoard() {
+      [hasFlippedCard, lockBoard] = [false, false];
+      [firstCard, secondCard] = [null, null];
+    }
+
+    initGame();
+  </script>
+</body>
+</html>

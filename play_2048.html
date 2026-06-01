@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="gamer">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2048 — NihalZone</title>
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    .game-container { max-width: 500px; margin: 0 auto; padding: 20px; background: var(--bg-card); border: 1px solid var(--color-border); border-radius: 16px; box-shadow: var(--glow-primary); text-align: center; }
+    .board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 20px auto; background: var(--bg-secondary); padding: 8px; border-radius: 8px; border: 2px solid var(--color-border); max-width: 320px; }
+    .cell { aspect-ratio: 1; background: rgba(0,0,0,0.3); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-size: 1.5rem; font-weight: bold; color: var(--color-text); transition: background 0.15s, transform 0.15s; }
+    .stats { display: flex; justify-content: space-around; font-family: var(--font-heading); font-size: 1.2rem; margin-bottom: 20px; color: var(--color-text); }
+    /* Tile Colors */
+    .c2 { background: #eee4da; color: #776e65; }
+    .c4 { background: #ede0c8; color: #776e65; }
+    .c8 { background: #f2b179; color: #f9f6f2; }
+    .c16 { background: #f59563; color: #f9f6f2; }
+    .c32 { background: #f67c5f; color: #f9f6f2; }
+    .c64 { background: #f65e3b; color: #f9f6f2; }
+    .c128 { background: #edcf72; color: #f9f6f2; font-size: 1.2rem; }
+    .c256 { background: #edcc61; color: #f9f6f2; font-size: 1.2rem; }
+    .c512 { background: #edc850; color: #f9f6f2; font-size: 1.2rem; }
+    .c1024 { background: #edc53f; color: #f9f6f2; font-size: 1rem; }
+    .c2048 { background: #edc22e; color: #f9f6f2; font-size: 1rem; box-shadow: 0 0 10px #edc22e; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand"><div class="logo-icon">⚡</div>NIHALZONE</a>
+    <div class="navbar-actions">
+      <a href="online_games.html" class="btn btn-outline btn-sm">Back</a>
+    </div>
+  </nav>
+
+  <div class="page-wrapper">
+    <div class="container" style="padding-top:20px;padding-bottom:80px;">
+      <div class="game-container">
+        <h2 style="color:var(--color-primary);font-family:var(--font-heading);margin-bottom:10px;">2048</h2>
+        <p style="color:var(--color-text-muted);font-size:0.8rem;margin-bottom:10px;">Use Arrows or swipe to move tiles.</p>
+        
+        <div class="stats">
+          <div>Score: <span id="scoreVal">0</span></div>
+        </div>
+
+        <div class="board" id="board" tabindex="0">
+          <!-- JS will inject cells -->
+        </div>
+
+        <button class="btn btn-primary" onclick="initGame()">🔄 Restart Game</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/core.js"></script>
+  <script>
+    NZ.initTheme();
+
+    let grid = [];
+    let score = 0;
+
+    function initGame() {
+      grid = [
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0]
+      ];
+      score = 0;
+      addTile();
+      addTile();
+      updateBoard();
+    }
+
+    function addTile() {
+      let empty = [];
+      for (let r = 0; r < 4; r++) {
+        for (let c = 0; c < 4; c++) {
+          if (grid[r][c] === 0) empty.push({r, c});
+        }
+      }
+      if (empty.length > 0) {
+        let rand = empty[Math.floor(Math.random() * empty.length)];
+        grid[rand.r][rand.c] = Math.random() > 0.1 ? 2 : 4;
+      }
+    }
+
+    function updateBoard() {
+      const board = document.getElementById('board');
+      board.innerHTML = '';
+      for (let r = 0; r < 4; r++) {
+        for (let c = 0; c < 4; c++) {
+          const val = grid[r][c];
+          const div = document.createElement('div');
+          div.className = `cell ${val > 0 ? 'c'+val : ''}`;
+          div.textContent = val > 0 ? val : '';
+          board.appendChild(div);
+        }
+      }
+      document.getElementById('scoreVal').textContent = score;
+    }
+
+    function slide(row) {
+      let arr = row.filter(val => val);
+      let missing = 4 - arr.length;
+      let zeros = Array(missing).fill(0);
+      return arr.concat(zeros);
+    }
+
+    function combine(row) {
+      for (let i = 0; i < 3; i++) {
+        if (row[i] !== 0 && row[i] === row[i+1]) {
+          row[i] *= 2;
+          score += row[i];
+          row[i+1] = 0;
+        }
+      }
+      return row;
+    }
+
+    function moveLeft() {
+      let changed = false;
+      for (let r = 0; r < 4; r++) {
+        let row = grid[r];
+        let newRow = slide(row);
+        newRow = combine(newRow);
+        newRow = slide(newRow);
+        if (row.join(',') !== newRow.join(',')) changed = true;
+        grid[r] = newRow;
+      }
+      return changed;
+    }
+
+    function moveRight() {
+      let changed = false;
+      for (let r = 0; r < 4; r++) {
+        let row = grid[r].slice().reverse();
+        let newRow = slide(row);
+        newRow = combine(newRow);
+        newRow = slide(newRow);
+        newRow.reverse();
+        if (grid[r].join(',') !== newRow.join(',')) changed = true;
+        grid[r] = newRow;
+      }
+      return changed;
+    }
+
+    function moveUp() {
+      let changed = false;
+      for (let c = 0; c < 4; c++) {
+        let row = [grid[0][c], grid[1][c], grid[2][c], grid[3][c]];
+        let newRow = slide(row);
+        newRow = combine(newRow);
+        newRow = slide(newRow);
+        if (row.join(',') !== newRow.join(',')) changed = true;
+        for (let r = 0; r < 4; r++) grid[r][c] = newRow[r];
+      }
+      return changed;
+    }
+
+    function moveDown() {
+      let changed = false;
+      for (let c = 0; c < 4; c++) {
+        let row = [grid[0][c], grid[1][c], grid[2][c], grid[3][c]].reverse();
+        let newRow = slide(row);
+        newRow = combine(newRow);
+        newRow = slide(newRow);
+        newRow.reverse();
+        let orig = [grid[0][c], grid[1][c], grid[2][c], grid[3][c]];
+        if (orig.join(',') !== newRow.join(',')) changed = true;
+        for (let r = 0; r < 4; r++) grid[r][c] = newRow[r];
+      }
+      return changed;
+    }
+
+    function handleInput(e) {
+      let changed = false;
+      if (e.key === 'ArrowLeft') changed = moveLeft();
+      else if (e.key === 'ArrowRight') changed = moveRight();
+      else if (e.key === 'ArrowUp') changed = moveUp();
+      else if (e.key === 'ArrowDown') changed = moveDown();
+
+      if (changed) {
+        addTile();
+        updateBoard();
+        checkGameOver();
+      }
+    }
+
+    function checkGameOver() {
+      let over = true;
+      for (let r = 0; r < 4; r++) {
+        for (let c = 0; c < 4; c++) {
+          if (grid[r][c] === 0) over = false;
+          if (c !== 3 && grid[r][c] === grid[r][c+1]) over = false;
+          if (r !== 3 && grid[r][c] === grid[r+1][c]) over = false;
+        }
+      }
+      if (over) setTimeout(() => alert('Game Over! Score: ' + score), 100);
+    }
+
+    document.addEventListener('keydown', handleInput);
+
+    // Touch Support
+    let touchStartX = 0;
+    let touchStartY = 0;
+    const board = document.getElementById('board');
+    
+    board.addEventListener('touchstart', e => {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      e.preventDefault();
+    }, {passive: false});
+
+    board.addEventListener('touchend', e => {
+      let touchEndX = e.changedTouches[0].clientX;
+      let touchEndY = e.changedTouches[0].clientY;
+      handleSwipe(touchStartX, touchStartY, touchEndX, touchEndY);
+      e.preventDefault();
+    }, {passive: false});
+
+    function handleSwipe(startX, startY, endX, endY) {
+      let dx = endX - startX;
+      let dy = endY - startY;
+      let absDx = Math.abs(dx);
+      let absDy = Math.abs(dy);
+      
+      if (Math.max(absDx, absDy) > 30) {
+        let e = { key: '' };
+        if (absDx > absDy) {
+          e.key = dx > 0 ? 'ArrowRight' : 'ArrowLeft';
+        } else {
+          e.key = dy > 0 ? 'ArrowDown' : 'ArrowUp';
+        }
+        handleInput(e);
+      }
+    }
+
+    initGame();
+  </script>
+</body>
+</html>

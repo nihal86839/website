@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="gamer">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flappy Cube — NihalZone</title>
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    .game-container { max-width: 500px; margin: 0 auto; padding: 20px; background: var(--bg-card); border: 1px solid var(--color-border); border-radius: 16px; box-shadow: var(--glow-primary); text-align: center; }
+    canvas { background: linear-gradient(180deg, #111 0%, #222 100%); border: 2px solid var(--color-border); border-radius: 8px; width: 100%; max-width: 400px; height: 500px; display: block; margin: 0 auto 20px; box-shadow: 0 0 20px rgba(0,0,0,0.5); cursor: pointer; }
+    .stats { font-family: var(--font-heading); font-size: 1.5rem; margin-bottom: 10px; color: var(--color-primary); }
+    #gameOverScreen { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); padding: 30px; border-radius: 12px; border: 1px solid #ff0040; display: none; text-align: center; backdrop-filter: blur(5px); pointer-events: none; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand"><div class="logo-icon">⚡</div>NIHALZONE</a>
+    <div class="navbar-actions">
+      <a href="online_games.html" class="btn btn-outline btn-sm">Back</a>
+    </div>
+  </nav>
+
+  <div class="page-wrapper">
+    <div class="container" style="padding-top:20px;padding-bottom:80px;">
+      <div class="game-container">
+        <h2 style="color:var(--color-primary);font-family:var(--font-heading);margin-bottom:10px;">FLAPPY CUBE</h2>
+        <p style="color:var(--color-text-muted);font-size:0.8rem;margin-bottom:10px;">Click, tap, or press Space to jump.</p>
+        
+        <div class="stats">Score: <span id="scoreVal">0</span></div>
+
+        <div style="position:relative; max-width:400px; margin:0 auto;">
+          <canvas id="gameCanvas" width="400" height="500"></canvas>
+          <div id="gameOverScreen">
+            <h3 style="color:#ff0040;font-family:var(--font-heading);font-size:2rem;margin-bottom:10px;">GAME OVER</h3>
+            <button class="btn btn-primary" style="pointer-events:auto;" onclick="initGame()">Play Again</button>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" id="startBtn" onclick="initGame()">▶️ Start Game</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/core.js"></script>
+  <script>
+    NZ.initTheme();
+
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    let isPlaying = false;
+    let frames = 0;
+    let score = 0;
+    let animationId;
+    
+    const cube = {
+      x: 50,
+      y: 150,
+      width: 30,
+      height: 30,
+      velocity: 0,
+      gravity: 0.25,
+      jump: -5.5,
+      draw: function() {
+        ctx.fillStyle = '#00ff88';
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = '#00ff88';
+        ctx.fillRect(this.x, this.y, this.width, this.height);
+        ctx.shadowBlur = 0;
+      },
+      update: function() {
+        this.velocity += this.gravity;
+        this.y += this.velocity;
+        
+        if (this.y + this.height >= canvas.height) {
+          this.y = canvas.height - this.height;
+          gameOver();
+        }
+        if (this.y < 0) {
+          this.y = 0;
+          this.velocity = 0;
+        }
+      }
+    };
+
+    const pipes = {
+      items: [],
+      width: 50,
+      gap: 130,
+      dx: 3,
+      draw: function() {
+        for(let i=0; i<this.items.length; i++) {
+          let p = this.items[i];
+          ctx.fillStyle = '#ff006e';
+          // Top pipe
+          ctx.fillRect(p.x, 0, this.width, p.y);
+          // Bottom pipe
+          ctx.fillRect(p.x, p.y + this.gap, this.width, canvas.height - p.y - this.gap);
+        }
+      },
+      update: function() {
+        if (frames % 100 === 0) {
+          this.items.push({
+            x: canvas.width,
+            y: Math.random() * (canvas.height - this.gap - 100) + 50
+          });
+        }
+        
+        for(let i=0; i<this.items.length; i++) {
+          let p = this.items[i];
+          p.x -= this.dx;
+          
+          // Collision
+          if (cube.x + cube.width > p.x && cube.x < p.x + this.width) {
+            if (cube.y < p.y || cube.y + cube.height > p.y + this.gap) {
+              gameOver();
+            }
+          }
+          
+          // Score
+          if (p.x + this.width === cube.x) {
+            score++;
+            document.getElementById('scoreVal').textContent = score;
+          }
+          
+          // Remove offscreen
+          if (p.x + this.width < 0) {
+            this.items.shift();
+            i--;
+          }
+        }
+      }
+    };
+
+    function jump() {
+      if (!isPlaying) return;
+      cube.velocity = cube.jump;
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.code === 'Space') jump();
+    });
+    canvas.addEventListener('mousedown', jump);
+    canvas.addEventListener('touchstart', e => { e.preventDefault(); jump(); });
+
+    function initGame() {
+      document.getElementById('gameOverScreen').style.display = 'none';
+      document.getElementById('startBtn').style.display = 'none';
+      cube.y = 150;
+      cube.velocity = 0;
+      pipes.items = [];
+      score = 0;
+      frames = 0;
+      document.getElementById('scoreVal').textContent = score;
+      isPlaying = true;
+      gameLoop();
+    }
+
+    function gameOver() {
+      isPlaying = false;
+      cancelAnimationFrame(animationId);
+      document.getElementById('gameOverScreen').style.display = 'block';
+    }
+
+    function gameLoop() {
+      if(!isPlaying) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      pipes.draw();
+      pipes.update();
+      cube.draw();
+      cube.update();
+      
+      frames++;
+      animationId = requestAnimationFrame(gameLoop);
+    }
+  </script>
+</body>
+</html>

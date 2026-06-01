@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="hacker">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terminal — NihalZone</title>
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    body { background: #000; overflow: hidden; }
+    .term-wrapper { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; background: rgba(0, 5, 0, 0.95); z-index: 1000; padding: 20px; font-family: var(--font-mono); }
+    .term-header { display: flex; justify-content: space-between; border-bottom: 1px solid #00ff41; padding-bottom: 10px; margin-bottom: 10px; color: #00ff41; }
+    .term-body { flex: 1; overflow-y: auto; color: #00ff41; display: flex; flex-direction: column; padding-bottom: 20px; }
+    .term-line { margin-bottom: 4px; word-break: break-all; }
+    .term-input-line { display: flex; align-items: center; }
+    .term-prompt { margin-right: 8px; color: #00ff41; font-weight: bold; white-space: nowrap; }
+    .term-input { flex: 1; background: transparent; border: none; color: #00ff41; font-family: var(--font-mono); font-size: 1rem; outline: none; caret-color: #00ff41; }
+    .term-output { color: #00ccff; margin-bottom: 8px; }
+    .term-error { color: #ff0040; margin-bottom: 8px; }
+    .term-exit { cursor: pointer; color: #ff0040; text-decoration: none; font-weight: bold; }
+    .term-exit:hover { text-shadow: 0 0 10px #ff0040; }
+  </style>
+</head>
+<body>
+  <div class="term-wrapper" id="terminal" onclick="document.getElementById('cmd').focus()">
+    <div class="term-header">
+      <div>[NZ-OS V2.4] TERMINAL NODE</div>
+      <a href="index.html" class="term-exit">[X] EXIT TERMINAL</a>
+    </div>
+    <div class="term-body" id="termBody">
+      <div class="term-line">Welcome to NihalZone Terminal.</div>
+      <div class="term-line">Type 'help' to see available commands.</div>
+      <br>
+    </div>
+    <div class="term-input-line" id="inputLine">
+      <span class="term-prompt" id="prompt">guest@nihalzone:~$</span>
+      <input type="text" class="term-input" id="cmd" autocomplete="off" spellcheck="false" autofocus>
+    </div>
+  </div>
+
+  <script src="js/core.js"></script>
+  <script>
+    const termBody = document.getElementById('termBody');
+    const cmdInput = document.getElementById('cmd');
+    const promptEl = document.getElementById('prompt');
+
+    const session = NZ.getSession();
+    const user = session ? session.username : 'guest';
+    promptEl.textContent = `${user}@nihalzone:~$`;
+
+    const fileSystem = {
+      'readme.txt': 'Welcome to the hidden depths of NihalZone. Keep exploring.',
+      'secrets.txt': 'There are no secrets here... yet.',
+      'admin.sh': 'Permission denied.'
+    };
+
+    function print(text, type = 'output') {
+      const el = document.createElement('div');
+      el.className = 'term-line term-' + type;
+      el.innerHTML = text.replace(/\n/g, '<br>').replace(/ /g, '&nbsp;');
+      termBody.appendChild(el);
+      termBody.scrollTop = termBody.scrollHeight;
+    }
+
+    function processCommand(cmd) {
+      print(`${promptEl.textContent} ${cmd}`, 'echo');
+      const args = cmd.trim().split(' ').filter(Boolean);
+      if (args.length === 0) return;
+
+      const command = args[0].toLowerCase();
+
+      switch(command) {
+        case 'help':
+          print('Available commands:\n  help    - Show this message\n  clear   - Clear terminal\n  echo    - Print text\n  date    - Show current date/time\n  whoami  - Show current user\n  ls      - List files\n  cat     - Read file contents\n  sudo    - Execute as superuser\n  exit    - Leave terminal');
+          break;
+        case 'clear':
+          termBody.innerHTML = '';
+          break;
+        case 'echo':
+          print(args.slice(1).join(' '));
+          break;
+        case 'date':
+          print(new Date().toString());
+          break;
+        case 'whoami':
+          print(user);
+          break;
+        case 'ls':
+          print(Object.keys(fileSystem).join('  '));
+          break;
+        case 'cat':
+          if (args[1]) {
+            if (fileSystem[args[1]]) print(fileSystem[args[1]]);
+            else print(`cat: ${args[1]}: No such file or directory`, 'error');
+          } else {
+            print('Usage: cat <filename>', 'error');
+          }
+          break;
+        case 'sudo':
+          print('sudo: You are not in the sudoers file. This incident will be reported.', 'error');
+          break;
+        case 'exit':
+          window.location.href = 'index.html';
+          break;
+        default:
+          print(`Command not found: ${command}`, 'error');
+          break;
+      }
+    }
+
+    cmdInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        processCommand(this.value);
+        this.value = '';
+      }
+    });
+  </script>
+</body>
+</html>

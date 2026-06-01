@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="gamer">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Whack-a-Mole — NihalZone</title>
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    .game-container { max-width: 500px; margin: 0 auto; padding: 20px; background: var(--bg-card); border: 1px solid var(--color-border); border-radius: 16px; box-shadow: var(--glow-primary); text-align: center; }
+    .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px auto; max-width: 300px; }
+    .hole { aspect-ratio: 1; background: #3a2318; border: 4px solid #24140c; border-radius: 50%; position: relative; overflow: hidden; }
+    .mole { width: 100%; height: 100%; background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="%238B4513"/><circle cx="35" cy="40" r="5" fill="white"/><circle cx="65" cy="40" r="5" fill="white"/><circle cx="35" cy="40" r="2" fill="black"/><circle cx="65" cy="40" r="2" fill="black"/><ellipse cx="50" cy="55" rx="15" ry="10" fill="%23FFC0CB"/><circle cx="45" cy="55" r="2" fill="black"/><circle cx="55" cy="55" r="2" fill="black"/></svg>') no-repeat center bottom; background-size: 80%; position: absolute; bottom: -100%; transition: bottom 0.1s; cursor: crosshair; }
+    .mole.up { bottom: 0; }
+    .stats { display: flex; justify-content: space-around; font-family: var(--font-heading); font-size: 1.2rem; margin-bottom: 20px; color: var(--color-text); }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand"><div class="logo-icon">⚡</div>NIHALZONE</a>
+    <div class="navbar-actions">
+      <a href="online_games.html" class="btn btn-outline btn-sm">Back</a>
+    </div>
+  </nav>
+
+  <div class="page-wrapper">
+    <div class="container" style="padding-top:20px;padding-bottom:80px;">
+      <div class="game-container">
+        <h2 style="color:var(--color-primary);font-family:var(--font-heading);margin-bottom:10px;">WHACK-A-MOLE</h2>
+        
+        <div class="stats">
+          <div>Score: <span id="scoreVal">0</span></div>
+          <div>Time: <span id="timeVal">30</span>s</div>
+        </div>
+
+        <div class="board">
+          <div class="hole"><div class="mole" id="m0"></div></div>
+          <div class="hole"><div class="mole" id="m1"></div></div>
+          <div class="hole"><div class="mole" id="m2"></div></div>
+          <div class="hole"><div class="mole" id="m3"></div></div>
+          <div class="hole"><div class="mole" id="m4"></div></div>
+          <div class="hole"><div class="mole" id="m5"></div></div>
+          <div class="hole"><div class="mole" id="m6"></div></div>
+          <div class="hole"><div class="mole" id="m7"></div></div>
+          <div class="hole"><div class="mole" id="m8"></div></div>
+        </div>
+
+        <button class="btn btn-primary" id="startBtn" onclick="initGame()">▶️ Start Game</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/core.js"></script>
+  <script>
+    NZ.initTheme();
+
+    const moles = document.querySelectorAll('.mole');
+    let lastHole;
+    let timeUp = false;
+    let score = 0;
+    let time = 30;
+    let gameTimer;
+    let moleTimer;
+
+    function randomTime(min, max) {
+      return Math.round(Math.random() * (max - min) + min);
+    }
+
+    function randomHole(moles) {
+      const idx = Math.floor(Math.random() * moles.length);
+      const hole = moles[idx];
+      if (hole === lastHole) return randomHole(moles);
+      lastHole = hole;
+      return hole;
+    }
+
+    function peep() {
+      const time = randomTime(400, 1000);
+      const mole = randomHole(moles);
+      mole.classList.add('up');
+      moleTimer = setTimeout(() => {
+        mole.classList.remove('up');
+        if (!timeUp) peep();
+      }, time);
+    }
+
+    function initGame() {
+      document.getElementById('startBtn').style.display = 'none';
+      score = 0;
+      time = 30;
+      timeUp = false;
+      document.getElementById('scoreVal').textContent = score;
+      document.getElementById('timeVal').textContent = time;
+      
+      clearInterval(gameTimer);
+      clearTimeout(moleTimer);
+      
+      peep();
+      
+      gameTimer = setInterval(() => {
+        time--;
+        document.getElementById('timeVal').textContent = time;
+        if(time <= 0) {
+          timeUp = true;
+          clearInterval(gameTimer);
+          document.getElementById('startBtn').style.display = 'inline-flex';
+          document.getElementById('startBtn').textContent = 'Play Again';
+          setTimeout(() => alert('Time is up! Score: ' + score), 100);
+        }
+      }, 1000);
+    }
+
+    function whack(e) {
+      if(!e.isTrusted) return; // cheater!
+      if(!this.classList.contains('up')) return;
+      score++;
+      this.classList.remove('up');
+      document.getElementById('scoreVal').textContent = score;
+    }
+
+    moles.forEach(mole => mole.addEventListener('click', whack));
+  </script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="gamer">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Snake — NihalZone</title>
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    .game-container { max-width: 500px; margin: 0 auto; padding: 20px; background: var(--bg-card); border: 1px solid var(--color-border); border-radius: 16px; box-shadow: var(--glow-primary); text-align: center; }
+    canvas { background: #111; border: 2px solid var(--color-border); border-radius: 8px; width: 100%; max-width: 400px; height: 400px; display: block; margin: 0 auto 20px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+    .score-board { display: flex; justify-content: space-between; font-family: var(--font-heading); font-size: 1.2rem; color: var(--color-primary); margin-bottom: 10px; max-width: 400px; margin-left: auto; margin-right: auto; }
+    .dpad { display: grid; grid-template-columns: 60px 60px 60px; grid-template-rows: 60px 60px 60px; gap: 10px; justify-content: center; margin-bottom: 20px; }
+    .dpad button { background: var(--bg-secondary); border: 2px solid var(--color-border); color: var(--color-text); font-size: 1.5rem; border-radius: 12px; }
+    .dpad button:active { background: var(--color-primary); }
+    .dpad-up { grid-column: 2; grid-row: 1; }
+    .dpad-left { grid-column: 1; grid-row: 2; }
+    .dpad-right { grid-column: 3; grid-row: 2; }
+    .dpad-down { grid-column: 2; grid-row: 3; }
+    @media(min-width: 768px) { .dpad { display: none; } }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand"><div class="logo-icon">⚡</div>NIHALZONE</a>
+    <div class="navbar-actions">
+      <a href="online_games.html" class="btn btn-outline btn-sm">Back</a>
+    </div>
+  </nav>
+
+  <div class="page-wrapper">
+    <div class="container" style="padding-top:20px;padding-bottom:80px;">
+      <div class="game-container">
+        <h2 style="color:var(--color-primary);font-family:var(--font-heading);">SNAKE</h2>
+        
+        <div class="score-board">
+          <div>Score: <span id="scoreVal">0</span></div>
+          <div>High Score: <span id="highScoreVal">0</span></div>
+        </div>
+
+        <canvas id="gameCanvas" width="400" height="400"></canvas>
+        
+        <div class="dpad">
+          <button class="dpad-up" onclick="setDir(0, -1)">⬆️</button>
+          <button class="dpad-left" onclick="setDir(-1, 0)">⬅️</button>
+          <button class="dpad-right" onclick="setDir(1, 0)">➡️</button>
+          <button class="dpad-down" onclick="setDir(0, 1)">⬇️</button>
+        </div>
+
+        <button class="btn btn-primary" id="startBtn" onclick="initGame()">▶️ Start Game</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/core.js"></script>
+  <script>
+    NZ.initTheme();
+
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const box = 20;
+    
+    let snake = [];
+    let food;
+    let score = 0;
+    let d = {x: 1, y: 0};
+    let gameLoop;
+    let isPlaying = false;
+    let highScore = localStorage.getItem('nz_snake_high') || 0;
+    document.getElementById('highScoreVal').textContent = highScore;
+
+    document.addEventListener('keydown', (e) => {
+      if(e.key === 'ArrowLeft' && d.x !== 1) setDir(-1, 0);
+      else if(e.key === 'ArrowUp' && d.y !== 1) setDir(0, -1);
+      else if(e.key === 'ArrowRight' && d.x !== -1) setDir(1, 0);
+      else if(e.key === 'ArrowDown' && d.y !== -1) setDir(0, 1);
+    });
+
+    function setDir(x, y) {
+      if ((x === 1 && d.x === -1) || (x === -1 && d.x === 1) || (y === 1 && d.y === -1) || (y === -1 && d.y === 1)) return;
+      d = {x, y};
+    }
+
+    function initGame() {
+      clearInterval(gameLoop);
+      snake = [{x: 9 * box, y: 9 * box}];
+      d = {x: 1, y: 0};
+      score = 0;
+      document.getElementById('scoreVal').textContent = score;
+      document.getElementById('startBtn').style.display = 'none';
+      spawnFood();
+      isPlaying = true;
+      gameLoop = setInterval(draw, 100);
+    }
+
+    function spawnFood() {
+      food = {
+        x: Math.floor(Math.random() * (canvas.width / box)) * box,
+        y: Math.floor(Math.random() * (canvas.height / box)) * box
+      };
+    }
+
+    function draw() {
+      if(!isPlaying) return;
+      ctx.fillStyle = '#111';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      for(let i = 0; i < snake.length; i++) {
+        ctx.fillStyle = (i === 0) ? '#00ff41' : '#008822';
+        ctx.fillRect(snake[i].x, snake[i].y, box, box);
+        ctx.strokeStyle = '#000';
+        ctx.strokeRect(snake[i].x, snake[i].y, box, box);
+      }
+
+      ctx.fillStyle = '#ff0040';
+      ctx.fillRect(food.x, food.y, box, box);
+
+      let snakeX = snake[0].x + d.x * box;
+      let snakeY = snake[0].y + d.y * box;
+
+      if(snakeX === food.x && snakeY === food.y) {
+        score++;
+        document.getElementById('scoreVal').textContent = score;
+        if(score > highScore) {
+          highScore = score;
+          document.getElementById('highScoreVal').textContent = highScore;
+          localStorage.setItem('nz_snake_high', highScore);
+        }
+        spawnFood();
+      } else {
+        snake.pop();
+      }
+
+      let newHead = {x: snakeX, y: snakeY};
+
+      if(snakeX < 0 || snakeX >= canvas.width || snakeY < 0 || snakeY >= canvas.height || collision(newHead, snake)) {
+        clearInterval(gameLoop);
+        isPlaying = false;
+        ctx.fillStyle = 'rgba(255,0,64,0.5)';
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+        document.getElementById('startBtn').style.display = 'inline-flex';
+        document.getElementById('startBtn').textContent = 'Restart Game';
+        return;
+      }
+
+      snake.unshift(newHead);
+    }
+
+    function collision(head, array) {
+      for(let i = 0; i < array.length; i++) {
+        if(head.x === array[i].x && head.y === array[i].y) return true;
+      }
+      return false;
+    }
+  </script>
+</body>
+</html>

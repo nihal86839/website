@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="gamer">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tic Tac Toe — NihalZone</title>
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    .game-container { max-width: 400px; margin: 0 auto; padding: 20px; background: var(--bg-card); border: 1px solid var(--color-border); border-radius: 16px; box-shadow: var(--glow-primary); text-align: center; }
+    .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px auto; max-width: 300px; }
+    .cell { aspect-ratio: 1; background: var(--bg-secondary); border: 2px solid var(--color-border); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-size: 3rem; cursor: pointer; transition: 0.2s; color: var(--color-text); }
+    .cell:hover { background: var(--bg-card-hover); }
+    .cell.x { color: var(--color-primary); text-shadow: var(--glow-primary); }
+    .cell.o { color: var(--color-secondary); text-shadow: var(--glow-secondary); }
+    .status { font-family: var(--font-heading); font-size: 1.2rem; margin-bottom: 20px; color: var(--color-text); min-height: 1.5em; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand"><div class="logo-icon">⚡</div>NIHALZONE</a>
+    <div class="navbar-actions">
+      <a href="online_games.html" class="btn btn-outline btn-sm">Back to Games</a>
+    </div>
+  </nav>
+
+  <div class="page-wrapper">
+    <div class="container" style="padding-top:40px;padding-bottom:80px;">
+      <div class="game-container">
+        <h2 style="color:var(--color-primary);font-family:var(--font-heading);margin-bottom:20px;">TIC TAC TOE</h2>
+        
+        <div class="status" id="status">Your turn (X)</div>
+
+        <div class="board" id="board">
+          <div class="cell" onclick="makeMove(0)"></div>
+          <div class="cell" onclick="makeMove(1)"></div>
+          <div class="cell" onclick="makeMove(2)"></div>
+          <div class="cell" onclick="makeMove(3)"></div>
+          <div class="cell" onclick="makeMove(4)"></div>
+          <div class="cell" onclick="makeMove(5)"></div>
+          <div class="cell" onclick="makeMove(6)"></div>
+          <div class="cell" onclick="makeMove(7)"></div>
+          <div class="cell" onclick="makeMove(8)"></div>
+        </div>
+
+        <button class="btn btn-primary" onclick="initGame()">🔄 Restart Game</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/core.js"></script>
+  <script>
+    NZ.initTheme();
+
+    let board = Array(9).fill('');
+    let gameActive = true;
+    let playerTurn = true; // true = X, false = O
+
+    const winningConditions = [
+      [0,1,2], [3,4,5], [6,7,8], // rows
+      [0,3,6], [1,4,7], [2,5,8], // cols
+      [0,4,8], [2,4,6]           // diagonals
+    ];
+
+    function initGame() {
+      board = Array(9).fill('');
+      gameActive = true;
+      playerTurn = true;
+      document.getElementById('status').textContent = 'Your turn (X)';
+      const cells = document.querySelectorAll('.cell');
+      cells.forEach(cell => { cell.textContent = ''; cell.className = 'cell'; });
+    }
+
+    function makeMove(index) {
+      if(board[index] !== '' || !gameActive || !playerTurn) return;
+
+      board[index] = 'X';
+      const cell = document.querySelectorAll('.cell')[index];
+      cell.textContent = 'X';
+      cell.classList.add('x');
+
+      if (checkWin('X')) { endGame('You Win! 🎉'); return; }
+      if (board.every(c => c !== '')) { endGame('Draw! 🤝'); return; }
+
+      playerTurn = false;
+      document.getElementById('status').textContent = 'AI is thinking...';
+      
+      setTimeout(aiMove, 600);
+    }
+
+    function aiMove() {
+      if(!gameActive) return;
+      
+      let available = [];
+      board.forEach((val, i) => { if(val === '') available.push(i); });
+      
+      if(available.length > 0) {
+        const choice = available[Math.floor(Math.random() * available.length)];
+        board[choice] = 'O';
+        const cell = document.querySelectorAll('.cell')[choice];
+        cell.textContent = 'O';
+        cell.classList.add('o');
+
+        if (checkWin('O')) { endGame('AI Wins! 💀'); return; }
+        if (board.every(c => c !== '')) { endGame('Draw! 🤝'); return; }
+      }
+
+      playerTurn = true;
+      document.getElementById('status').textContent = 'Your turn (X)';
+    }
+
+    function checkWin(player) {
+      return winningConditions.some(cond => {
+        return cond.every(idx => board[idx] === player);
+      });
+    }
+
+    function endGame(msg) {
+      gameActive = false;
+      document.getElementById('status').textContent = msg;
+    }
+  </script>
+</body>
+</html>

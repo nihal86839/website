@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="gamer">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Online Games — NihalZone</title>
+  <meta name="description" content="Play exciting online games directly in your browser.">
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    .game-banner { height: 180px; object-fit: cover; width: 100%; border-bottom: 1px solid var(--color-border); background: var(--bg-secondary); display: flex; align-items: center; justify-content: center; font-size: 4rem; }
+  </style>
+</head>
+<body>
+  <canvas id="matrixCanvas" class="matrix-canvas"></canvas>
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand"><div class="logo-icon">⚡</div>NIHALZONE</a>
+    <ul class="navbar-nav">
+      <li><a href="index.html" class="nav-link">🏠 Home</a></li>
+      <li><a href="games.html" class="nav-link">🎮 Downloads</a></li>
+      <li><a href="online_games.html" class="nav-link active">🕹 Play Online</a></li>
+      <li><a href="tools.html" class="nav-link">🔧 Tools</a></li>
+      <li><a href="terminal.html" class="nav-link">💻 Terminal</a></li>
+      <li><a href="videos.html" class="nav-link">🎬 Videos</a></li>
+      <li><a href="photos.html" class="nav-link">🖼 Photos</a></li>
+      <li><a href="songs.html" class="nav-link">🎵 Songs</a></li>
+      <li><a href="chat.html" class="nav-link">💬 Chat</a></li>
+      <li data-admin="true" class="hidden"><a href="admin.html" class="nav-link neon-text-secondary">⚙ Admin</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <div class="theme-toggle">
+        <button class="theme-btn active" data-theme="gamer">🎮</button>
+        <button class="theme-btn" data-theme="hacker">💻</button>
+        <button class="theme-btn" data-theme="light">☀️</button>
+      </div>
+      <a href="login.html" class="btn btn-outline btn-sm" data-auth="false">Login</a>
+      <a href="signup.html" class="btn btn-primary btn-sm" data-auth="false">Sign Up</a>
+      <div data-auth="true" class="hidden" style="display:flex;align-items:center;gap:8px;">
+        <div class="user-dropdown-container" id="profileDropdownContainer">
+          <div style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:4px;" id="profileDropdownToggle">
+            <div class="user-avatar" id="navUserAvatar" style="width:32px;height:32px;font-size:0.8rem;border-radius:8px;background:var(--gradient-primary);display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;overflow:hidden;">U</div>
+            <span id="navUserName" style="font-family:var(--font-heading);font-size:0.75rem;"></span>
+            <span>▼</span>
+          </div>
+          <div class="user-dropdown-menu">
+            <button class="dropdown-item" onclick="openProfileModal()">⚙️ Edit Profile</button>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item" data-action="logout" style="color:var(--color-secondary);">🚪 Logout</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+  </nav>
+  <div class="mobile-nav" id="mobileNav">
+    <a href="index.html" class="nav-link">🏠 Home</a>
+    <a href="online_games.html" class="nav-link active">🕹 Play Online</a>
+    <a href="games.html" class="nav-link">🎮 Downloads</a>
+    <a href="terminal.html" class="nav-link">💻 Terminal</a>
+    <a href="chat.html" class="nav-link">💬 Chat</a>
+    <div style="display:flex;gap:10px;margin-top:8px;">
+      <a href="login.html" class="btn btn-outline btn-sm" data-auth="false">Login</a>
+      <button class="btn btn-outline btn-sm" data-action="logout" data-auth="true">Logout</button>
+    </div>
+  </div>
+
+  <div class="page-wrapper">
+    <div class="grid-bg"></div>
+    <div class="page-header">
+      <h1>🕹 BROWSER GAMES</h1>
+      <p>Play free HTML5 games directly in your browser. No downloads required!</p>
+    </div>
+    <div class="container" style="padding-bottom:80px;">
+      <div class="grid grid-3" id="gamesGrid">
+        <!-- Games will be injected here via JS -->
+      </div>
+    </div>
+  </div>
+
+  <script src="js/core.js"></script>
+  <script>
+    NZ.initTheme();
+    initNavbar();
+
+    function renderGames() {
+      const grid = document.getElementById('gamesGrid');
+      const games = NZ.getProducts('online_game');
+      
+      // Default built-in games if none exist
+      if (games.length === 0) {
+        // Add defaults silently to DB
+        NZ.addProduct({ type: 'online_game', name: '3x3 Sliding Puzzle', description: 'Slide the tiles to reassemble the picture. Test your brain and speed!', fileUrl: 'play_puzzle.html', imageUrl: '🧩', price: 0 });
+        NZ.addProduct({ type: 'online_game', name: 'Rock Paper Scissors', description: 'The classic game! Can you beat the NihalZone AI? Track your score.', fileUrl: 'play_rps.html', imageUrl: '✌️', price: 0 });
+        NZ.addProduct({ type: 'online_game', name: 'Neon Racer', description: 'Dodge the incoming traffic in this fast-paced neon highway racer.', fileUrl: 'play_car.html', imageUrl: '🏎️', price: 0 });
+        NZ.addProduct({ type: 'online_game', name: 'Tic Tac Toe', description: 'Classic Xs and Os. Play against the AI!', fileUrl: 'play_ttt.html', imageUrl: '❌', price: 0 });
+        NZ.addProduct({ type: 'online_game', name: 'Snake', description: 'Eat the apples and grow your snake. Dont hit the walls!', fileUrl: 'play_snake.html', imageUrl: '🐍', price: 0 });
+        NZ.addProduct({ type: 'online_game', name: 'Memory Match', description: 'Test your memory by finding all the matching pairs of cards.', fileUrl: 'play_memory.html', imageUrl: '🎴', price: 0 });
+        NZ.addProduct({ type: 'online_game', name: 'Whack-a-Mole', description: 'Whack the moles as fast as you can before time runs out!', fileUrl: 'play_mole.html', imageUrl: '🔨', price: 0 });
+        NZ.addProduct({ type: 'online_game', name: '2048', description: 'Slide tiles and merge them to reach 2048.', fileUrl: 'play_2048.html', imageUrl: '🔢', price: 0 });
+        NZ.addProduct({ type: 'online_game', name: 'Simon Says', description: 'Follow the color patterns and test your memory.', fileUrl: 'play_simon.html', imageUrl: '🔴', price: 0 });
+        NZ.addProduct({ type: 'online_game', name: 'Flappy Cube', description: 'Tap to fly through the obstacles.', fileUrl: 'play_flappy.html', imageUrl: '🐦', price: 0 });
+      }
+
+      const activeGames = NZ.getProducts('online_game');
+      grid.innerHTML = activeGames.map(g => `
+        <a href="${g.fileUrl}" class="card" style="text-decoration:none;color:inherit;">
+          ${g.imageUrl.startsWith('http') || g.imageUrl.startsWith('data:') 
+            ? `<img src="${g.imageUrl}" class="game-banner" style="object-fit:cover;">` 
+            : `<div class="game-banner">${g.imageUrl || '🕹'}</div>`}
+          <div class="card-body">
+            <h3 class="card-title" style="font-size:1.2rem;">${NZ.sanitize(g.name)}</h3>
+            <p class="card-desc">${NZ.sanitize(g.description)}</p>
+          </div>
+          <div class="card-footer">
+            <span class="badge badge-success">Free to Play</span>
+            <span class="btn btn-primary btn-sm">Play Now</span>
+          </div>
+        </a>
+      `).join('');
+    }
+
+    renderGames();
+  </script>
+</body>
+</html>

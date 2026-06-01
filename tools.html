@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="gamer">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hacking Tools — NihalZone</title>
+  <meta name="description" content="Ethical hacking tools for security professionals. Download free and premium tools.">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+  <canvas id="matrixCanvas" class="matrix-canvas"></canvas>
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand"><div class="logo-icon">⚡</div>NIHALZONE</a>
+    <ul class="navbar-nav">
+      <li><a href="index.html" class="nav-link">🏠 Home</a></li>
+      <li><a href="games.html" class="nav-link">🎮 Games</a>
+    <a href="online_games.html" class="nav-link">🕹 Play Online</a></li>
+      <li><a href="online_games.html" class="nav-link">🕹 Play Online</a></li>
+      <li><a href="tools.html" class="nav-link active">🔧 Tools</a>
+    <a href="terminal.html" class="nav-link">💻 Terminal</a></li>
+      <li><a href="videos.html" class="nav-link">🎬 Videos</a></li>
+      <li><a href="photos.html" class="nav-link">🖼 Photos</a></li>
+      <li><a href="songs.html" class="nav-link">🎵 Songs</a></li>
+      <li><a href="chat.html" class="nav-link">💬 Chat</a></li>
+      <li data-admin="true" class="hidden"><a href="admin.html" class="nav-link neon-text-secondary">⚙ Admin</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <div class="theme-toggle">
+        <button class="theme-btn" data-theme="gamer">🎮</button>
+        <button class="theme-btn" data-theme="hacker">💻</button>
+        <button class="theme-btn" data-theme="light">☀️</button>
+      </div>
+      <a href="login.html" class="btn btn-outline btn-sm" data-auth="false">Login</a>
+      <a href="signup.html" class="btn btn-primary btn-sm" data-auth="false">Sign Up</a>
+      <div data-auth="true" class="hidden" style="display:flex;align-items:center;gap:8px;">
+        <div class="user-dropdown-container" id="profileDropdownContainer">
+          <div style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:4px;" id="profileDropdownToggle">
+            <div class="user-avatar" id="navUserAvatar" style="width:32px;height:32px;font-size:0.8rem;border-radius:8px;background:var(--gradient-primary);display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;overflow:hidden;">U</div>
+            <span id="navUserName" style="font-family:var(--font-heading);font-size:0.75rem;"></span>
+            <span>▼</span>
+          </div>
+          <div class="user-dropdown-menu">
+            <button class="dropdown-item" onclick="openProfileModal()">⚙️ Edit Profile</button>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item" data-action="logout" style="color:var(--color-secondary);">🚪 Logout</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+  </nav>
+  <div class="mobile-nav" id="mobileNav">
+    <a href="index.html" class="nav-link">🏠 Home</a>
+    <a href="games.html" class="nav-link">🎮 Games</a>
+    <a href="online_games.html" class="nav-link">🕹 Play Online</a>
+    <a href="tools.html" class="nav-link">🔧 Tools</a>
+    <a href="videos.html" class="nav-link">🎬 Videos</a>
+    <a href="chat.html" class="nav-link">💬 Chat</a>
+    <div style="display:flex;gap:10px;margin-top:8px;">
+      <a href="login.html" class="btn btn-outline btn-sm" data-auth="false">Login</a>
+      <button class="btn btn-outline btn-sm" data-action="logout" data-auth="true">Logout</button>
+    </div>
+  </div>
+
+  <div class="page-wrapper">
+    <div class="grid-bg"></div>
+    <div class="page-header">
+      <div class="badge badge-danger" style="margin:0 auto 12px;display:inline-flex;">⚠️ FOR EDUCATIONAL USE ONLY</div>
+      <h1>🔧 ETHICAL HACKING TOOLS</h1>
+      <p>Professional security testing tools for ethical hackers and cybersecurity professionals.</p>
+    </div>
+
+    <div class="container" style="padding-bottom:80px;">
+      <div class="alert alert-danger" style="max-width:800px;margin:0 auto 24px;">
+        <span>⚠️</span>
+        <span>All tools are for <strong>EDUCATIONAL &amp; ETHICAL USE ONLY</strong>. Using these tools without authorization is illegal. NihalZone takes no responsibility for misuse.</span>
+      </div>
+
+      <div class="filter-bar">
+        <button class="filter-btn active" data-filter="all">All Tools</button>
+        <button class="filter-btn" data-filter="free">🆓 Free</button>
+        <button class="filter-btn" data-filter="paid">💎 Premium</button>
+        <div class="search-bar">
+          <input type="text" class="search-input" id="searchInput" placeholder="🔍 Search tools...">
+        </div>
+      </div>
+
+      <div class="grid grid-auto" id="toolsGrid" style="margin-top:10px;"></div>
+      <div id="emptyState" class="empty-state hidden">
+        <div class="empty-icon">🔧</div>
+        <h3>No tools found</h3>
+        <p>Admin hasn't added any tools yet.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tool Detail Modal -->
+  <div id="toolModal" class="modal-overlay hidden">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalToolTitle">Tool Name</h3>
+        <button class="modal-close" id="closeToolModal">✕</button>
+      </div>
+      <div class="modal-body" id="modalToolBody"></div>
+    </div>
+  </div>
+
+  <button class="donate-btn" id="donateBtn">💛 <span>Donate</span></button>
+  <div style="position:fixed;bottom:80px;right:24px;z-index:500;">
+    <button class="btn btn-outline btn-sm" id="supportBtn" style="border-radius:20px;">🎧 Support</button>
+  </div>
+
+  <script src="js/core.js"></script>
+  <script>
+    let allTools = [];
+    let currentFilter = 'all';
+
+    function renderTools(tools) {
+      const grid = document.getElementById('toolsGrid');
+      const empty = document.getElementById('emptyState');
+      if (!tools.length) { grid.innerHTML = ''; empty.classList.remove('hidden'); return; }
+      empty.classList.add('hidden');
+      grid.innerHTML = tools.map(t => `
+        <div class="card" style="cursor:pointer;" onclick="openToolDetail('${t.id}')">
+          ${t.imageUrl
+            ? `<img src="${t.imageUrl}" class="card-img" alt="${NZ.sanitize(t.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+               <div class="card-img-placeholder" style="display:none">🔧</div>`
+            : `<div class="card-img-placeholder">🔧</div>`}
+          <div class="card-body">
+            <div class="card-title">${NZ.sanitize(t.name)}</div>
+            <div class="card-desc">${NZ.sanitize(t.description || '')}</div>
+            <div style="display:flex;gap:8px;margin-top:8px;">
+              <span class="badge ${t.price > 0 ? 'badge-warning' : 'badge-success'}">${t.price > 0 ? '💎 Premium' : '🆓 Free'}</span>
+              <span class="badge badge-info">⬇ ${t.downloads || 0}</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span class="price-tag ${t.price > 0 ? 'price-paid' : 'price-free'}">${NZ.formatPrice(t.price)}</span>
+            <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();handleProductAction('${t.id}')">
+              ${t.price > 0 ? '💳 Buy' : '⬇ Get Tool'}
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openToolDetail(id) {
+      const t = NZ.getProductById(id);
+      if (!t) return;
+      document.getElementById('modalToolTitle').textContent = t.name;
+      document.getElementById('modalToolBody').innerHTML = `
+        <div style="display:flex;gap:20px;flex-wrap:wrap;">
+          <div style="flex:0 0 180px;">
+            ${t.imageUrl
+              ? `<img src="${t.imageUrl}" style="width:180px;height:180px;object-fit:cover;border-radius:12px;border:1px solid var(--color-border);" onerror="this.outerHTML='<div style=width:180px;height:180px;background:var(--bg-card);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:4rem;>🔧</div>'">`
+              : `<div style="width:180px;height:180px;background:var(--bg-card);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:4rem;">🔧</div>`}
+          </div>
+          <div style="flex:1;min-width:200px;">
+            <h2 style="font-family:var(--font-heading);color:var(--color-primary);margin-bottom:10px;">${NZ.sanitize(t.name)}</h2>
+            <p style="color:var(--color-text-muted);margin-bottom:16px;line-height:1.7;">${NZ.sanitize(t.description || 'No description.')}</p>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+              <span class="badge ${t.price > 0 ? 'badge-warning' : 'badge-success'}">${t.price > 0 ? '💎 Premium' : '🆓 Free'}</span>
+              <span class="badge badge-info">⬇ ${t.downloads || 0} downloads</span>
+              <span class="badge badge-primary">📅 ${NZ.formatDate(t.addedDate)}</span>
+            </div>
+            <div class="price-tag ${t.price > 0 ? 'price-paid' : 'price-free'}" style="font-size:1.5rem;margin-bottom:16px;">${NZ.formatPrice(t.price)}</div>
+            <button class="btn btn-primary btn-lg" onclick="handleProductAction('${t.id}')">
+              ${t.price > 0 ? '💳 Purchase' : '⬇ Download Tool'}
+            </button>
+          </div>
+        </div>
+      `;
+      document.getElementById('toolModal').classList.remove('hidden');
+    }
+
+    document.getElementById('closeToolModal').addEventListener('click', () => document.getElementById('toolModal').classList.add('hidden'));
+    document.getElementById('toolModal').addEventListener('click', e => { if (e.target === document.getElementById('toolModal')) document.getElementById('toolModal').classList.add('hidden'); });
+
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        currentFilter = this.dataset.filter;
+        applyFilters();
+      });
+    });
+
+    document.getElementById('searchInput').addEventListener('input', applyFilters);
+
+    function applyFilters() {
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      let tools = allTools;
+      if (currentFilter === 'free') tools = tools.filter(t => t.price === 0);
+      if (currentFilter === 'paid') tools = tools.filter(t => t.price > 0);
+      if (q) tools = tools.filter(t => t.name.toLowerCase().includes(q) || (t.description || '').toLowerCase().includes(q));
+      renderTools(tools);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      allTools = NZ.getProducts('tool');
+      renderTools(allTools);
+    });
+  </script>
+</body>
+</html>

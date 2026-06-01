@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="gamer">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neon Racer — NihalZone</title>
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    .game-container { max-width: 600px; margin: 0 auto; padding: 20px; background: var(--bg-card); border: 1px solid var(--color-border); border-radius: 16px; box-shadow: var(--glow-primary); text-align: center; }
+    canvas { background: #111; border: 2px solid var(--color-border); border-radius: 8px; width: 100%; max-width: 400px; height: 500px; display: block; margin: 0 auto 20px; box-shadow: 0 0 20px rgba(0,0,0,0.5); cursor: none; }
+    .score-board { display: flex; justify-content: space-between; font-family: var(--font-heading); font-size: 1.2rem; color: var(--color-primary); margin-bottom: 10px; max-width: 400px; margin-left: auto; margin-right: auto; }
+    #gameOverScreen { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); padding: 30px; border-radius: 12px; border: 1px solid #ff0040; display: none; text-align: center; backdrop-filter: blur(5px); }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand"><div class="logo-icon">⚡</div>NIHALZONE</a>
+    <ul class="navbar-nav">
+      <li><a href="index.html" class="nav-link">🏠 Home</a></li>
+      <li><a href="online_games.html" class="nav-link active">🕹 Play Online</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <div class="theme-toggle">
+        <button class="theme-btn active" data-theme="gamer">🎮</button>
+        <button class="theme-btn" data-theme="hacker">💻</button>
+        <button class="theme-btn" data-theme="light">☀️</button>
+      </div>
+      <a href="online_games.html" class="btn btn-outline btn-sm">Back</a>
+    </div>
+  </nav>
+
+  <div class="page-wrapper">
+    <div class="container" style="padding-top:20px;padding-bottom:80px;">
+      <div class="game-container">
+        <h2 style="margin-bottom:10px;color:var(--color-primary);text-shadow:var(--glow-primary);font-family:var(--font-heading);">NEON RACER</h2>
+        <p style="color:var(--color-text-muted);margin-bottom:10px;">Use Left/Right Arrows or touch sides to steer.</p>
+        
+        <div class="score-board">
+          <div>Score: <span id="scoreVal">0</span></div>
+          <div>Level: <span id="levelVal">1</span></div>
+        </div>
+
+        <div style="position:relative; max-width:400px; margin:0 auto;">
+          <canvas id="gameCanvas" width="400" height="500"></canvas>
+          <div id="gameOverScreen">
+            <h3 style="color:#ff0040;font-family:var(--font-heading);font-size:2rem;margin-bottom:10px;text-shadow:0 0 10px #ff0040;">CRASHED!</h3>
+            <p style="margin-bottom:20px;">Score: <span id="finalScore">0</span></p>
+            <button class="btn btn-primary" onclick="initGame()">Restart Game</button>
+          </div>
+        </div>
+        
+        <button class="btn btn-primary" id="startBtn" onclick="initGame()">▶️ Start Game</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/core.js"></script>
+  <script>
+    NZ.initTheme();
+
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    let animationId;
+    let isPlaying = false;
+
+    // Game variables
+    let score = 0;
+    let level = 1;
+    let speed = 5;
+    let frameCount = 0;
+
+    // Player car
+    const carWidth = 40;
+    const carHeight = 70;
+    let playerX = canvas.width / 2 - carWidth / 2;
+    const playerY = canvas.height - carHeight - 20;
+
+    // Enemies
+    let enemies = [];
+    
+    // Controls
+    let leftPressed = false;
+    let rightPressed = false;
+
+    document.addEventListener('keydown', (e) => {
+      if(e.key === 'ArrowLeft') leftPressed = true;
+      if(e.key === 'ArrowRight') rightPressed = true;
+    });
+    document.addEventListener('keyup', (e) => {
+      if(e.key === 'ArrowLeft') leftPressed = false;
+      if(e.key === 'ArrowRight') rightPressed = false;
+    });
+    
+    // Touch controls for mobile
+    canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      const touchX = e.touches[0].clientX - canvas.getBoundingClientRect().left;
+      if (touchX < canvas.width / 2) leftPressed = true;
+      else rightPressed = true;
+    });
+    canvas.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      leftPressed = false;
+      rightPressed = false;
+    });
+
+    function drawCar(x, y, color) {
+      ctx.fillStyle = color;
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = color;
+      ctx.fillRect(x, y, carWidth, carHeight);
+      // Windows
+      ctx.fillStyle = '#000';
+      ctx.shadowBlur = 0;
+      ctx.fillRect(x + 5, y + 10, carWidth - 10, 15);
+      ctx.fillRect(x + 5, y + 45, carWidth - 10, 15);
+    }
+
+    function initGame() {
+      document.getElementById('gameOverScreen').style.display = 'none';
+      document.getElementById('startBtn').style.display = 'none';
+      score = 0;
+      level = 1;
+      speed = 5;
+      enemies = [];
+      playerX = canvas.width / 2 - carWidth / 2;
+      isPlaying = true;
+      updateScore();
+      gameLoop();
+    }
+
+    function updateScore() {
+      document.getElementById('scoreVal').textContent = score;
+      document.getElementById('levelVal').textContent = level;
+    }
+
+    function gameOver() {
+      isPlaying = false;
+      cancelAnimationFrame(animationId);
+      document.getElementById('finalScore').textContent = score;
+      document.getElementById('gameOverScreen').style.display = 'block';
+      document.getElementById('startBtn').style.display = 'inline-flex';
+    }
+
+    function gameLoop() {
+      if (!isPlaying) return;
+      
+      // Clear canvas
+      ctx.fillStyle = '#111';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw road lines
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 5;
+      ctx.setLineDash([20, 20]);
+      ctx.beginPath();
+      ctx.moveTo(canvas.width / 3, 0 - (frameCount % 40));
+      ctx.lineTo(canvas.width / 3, canvas.height);
+      ctx.moveTo((canvas.width / 3) * 2, 0 - (frameCount % 40));
+      ctx.lineTo((canvas.width / 3) * 2, canvas.height);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Move player
+      if (leftPressed && playerX > 0) playerX -= 6;
+      if (rightPressed && playerX < canvas.width - carWidth) playerX += 6;
+
+      drawCar(playerX, playerY, '#00ff88');
+
+      // Spawn enemies
+      if (Math.random() < 0.02 + (level * 0.005)) {
+        const lane = Math.floor(Math.random() * 3);
+        const ex = (lane * (canvas.width / 3)) + ((canvas.width / 3) / 2) - (carWidth / 2);
+        enemies.push({ x: ex, y: -carHeight, color: '#ff0040' });
+      }
+
+      // Move & draw enemies
+      for (let i = 0; i < enemies.length; i++) {
+        const e = enemies[i];
+        e.y += speed;
+        drawCar(e.x, e.y, e.color);
+
+        // Collision detection
+        if (
+          playerX < e.x + carWidth &&
+          playerX + carWidth > e.x &&
+          playerY < e.y + carHeight &&
+          playerY + carHeight > e.y
+        ) {
+          gameOver();
+          return;
+        }
+
+        // Remove offscreen enemies
+        if (e.y > canvas.height) {
+          enemies.splice(i, 1);
+          i--;
+          score += 10;
+          if (score % 100 === 0) {
+            level++;
+            speed += 0.5;
+          }
+          updateScore();
+        }
+      }
+
+      frameCount++;
+      animationId = requestAnimationFrame(gameLoop);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="gamer">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Videos — NihalZone</title>
+  <meta name="description" content="Watch exclusive hacking and gaming videos on NihalZone.">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+  <canvas id="matrixCanvas" class="matrix-canvas"></canvas>
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand"><div class="logo-icon">⚡</div>NIHALZONE</a>
+    <ul class="navbar-nav">
+      <li><a href="index.html" class="nav-link">🏠 Home</a></li>
+      <li><a href="games.html" class="nav-link">🎮 Games</a>
+    <a href="online_games.html" class="nav-link">🕹 Play Online</a></li>
+      <li><a href="online_games.html" class="nav-link">🕹 Play Online</a></li>
+      <li><a href="tools.html" class="nav-link">🔧 Tools</a></li>
+      <li><a href="terminal.html" class="nav-link">💻 Terminal</a></li>
+      <li><a href="videos.html" class="nav-link active">🎬 Videos</a></li>
+      <li><a href="photos.html" class="nav-link">🖼 Photos</a></li>
+      <li><a href="songs.html" class="nav-link">🎵 Songs</a></li>
+      <li><a href="chat.html" class="nav-link">💬 Chat</a></li>
+      <li data-admin="true" class="hidden"><a href="admin.html" class="nav-link neon-text-secondary">⚙ Admin</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <div class="theme-toggle">
+        <button class="theme-btn" data-theme="gamer">🎮</button>
+        <button class="theme-btn" data-theme="hacker">💻</button>
+        <button class="theme-btn" data-theme="light">☀️</button>
+      </div>
+      <a href="login.html" class="btn btn-outline btn-sm" data-auth="false">Login</a>
+      <a href="signup.html" class="btn btn-primary btn-sm" data-auth="false">Sign Up</a>
+      <div data-auth="true" class="hidden" style="display:flex;align-items:center;gap:8px;">
+        <div class="user-dropdown-container" id="profileDropdownContainer">
+          <div style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:4px;" id="profileDropdownToggle">
+            <div class="user-avatar" id="navUserAvatar" style="width:32px;height:32px;font-size:0.8rem;border-radius:8px;background:var(--gradient-primary);display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;overflow:hidden;">U</div>
+            <span id="navUserName" style="font-family:var(--font-heading);font-size:0.75rem;"></span>
+            <span>▼</span>
+          </div>
+          <div class="user-dropdown-menu">
+            <button class="dropdown-item" onclick="openProfileModal()">⚙️ Edit Profile</button>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item" data-action="logout" style="color:var(--color-secondary);">🚪 Logout</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+  </nav>
+  <div class="mobile-nav" id="mobileNav">
+    <a href="index.html" class="nav-link">🏠 Home</a>
+    <a href="games.html" class="nav-link">🎮 Games</a>
+    <a href="online_games.html" class="nav-link">🕹 Play Online</a>
+    <a href="videos.html" class="nav-link">🎬 Videos</a>
+    <a href="chat.html" class="nav-link">💬 Chat</a>
+    <div style="display:flex;gap:10px;margin-top:8px;">
+      <a href="login.html" class="btn btn-outline btn-sm" data-auth="false">Login</a>
+      <button class="btn btn-outline btn-sm" data-action="logout" data-auth="true">Logout</button>
+    </div>
+  </div>
+
+  <div class="page-wrapper">
+    <div class="grid-bg"></div>
+    <div class="page-header">
+      <h1>🎬 VIDEOS</h1>
+      <p>Exclusive gaming and hacking tutorial videos. Stream or download.</p>
+    </div>
+    <div class="container" style="padding-bottom:80px;">
+      <div class="filter-bar">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="free">🆓 Free</button>
+        <button class="filter-btn" data-filter="paid">💎 Premium</button>
+        <div class="search-bar">
+          <input type="text" class="search-input" id="searchInput" placeholder="🔍 Search videos...">
+        </div>
+      </div>
+      <div class="grid grid-auto" id="videosGrid" style="margin-top:10px;"></div>
+      <div id="emptyState" class="empty-state hidden">
+        <div class="empty-icon">🎬</div>
+        <h3>No videos yet</h3>
+        <p>Check back soon for amazing content!</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Video Player Modal -->
+  <div id="videoModal" class="modal-overlay hidden">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalVideoTitle">Video</h3>
+        <button class="modal-close" id="closeVideoModal">✕</button>
+      </div>
+      <div class="modal-body" id="modalVideoBody"></div>
+    </div>
+  </div>
+
+  <button class="donate-btn" id="donateBtn">💛 <span>Donate</span></button>
+  <div style="position:fixed;bottom:80px;right:24px;z-index:500;">
+    <button class="btn btn-outline btn-sm" id="supportBtn" style="border-radius:20px;">🎧 Support</button>
+  </div>
+
+  <script src="js/core.js"></script>
+  <script>
+    let allVideos = [];
+    let currentFilter = 'all';
+
+    function getYouTubeId(url) {
+      if (!url) return null;
+      const match = url.match(/(?:youtube\.com\/(?:embed\/|watch\?v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+      return match ? match[1] : null;
+    }
+
+    function getVideoThumb(v) {
+      if (v.imageUrl) return v.imageUrl;
+      const ytId = getYouTubeId(v.fileUrl);
+      if (ytId) return `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+      return null;
+    }
+
+    function renderVideos(videos) {
+      const grid = document.getElementById('videosGrid');
+      const empty = document.getElementById('emptyState');
+      if (!videos.length) { grid.innerHTML = ''; empty.classList.remove('hidden'); return; }
+      empty.classList.add('hidden');
+      grid.innerHTML = videos.map(v => {
+        const thumb = getVideoThumb(v);
+        return `
+        <div class="card video-card" style="cursor:pointer;" onclick="openVideo('${v.id}')">
+          <div style="position:relative;overflow:hidden;">
+            ${thumb
+              ? `<img src="${thumb}" class="card-img" alt="${NZ.sanitize(v.name)}" style="height:160px;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                 <div class="card-img-placeholder" style="display:none;height:160px;">🎬</div>`
+              : `<div class="card-img-placeholder" style="height:160px;">🎬</div>`}
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+              <div style="width:50px;height:50px;background:rgba(0,0,0,0.7);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.4rem;border:2px solid var(--color-primary);backdrop-filter:blur(4px);">▶</div>
+            </div>
+            ${v.price > 0 ? `<div style="position:absolute;top:8px;right:8px;"><span class="badge badge-warning">💎 Premium</span></div>` : ''}
+          </div>
+          <div class="card-body">
+            <div class="card-title">${NZ.sanitize(v.name)}</div>
+            <div class="card-desc">${NZ.sanitize(v.description || '')}</div>
+            <div style="display:flex;gap:8px;margin-top:6px;">
+              <span class="badge badge-info">⬇ ${v.downloads || 0}</span>
+              <span class="badge badge-primary">📅 ${NZ.formatDate(v.addedDate)}</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span class="price-tag ${v.price > 0 ? 'price-paid' : 'price-free'}">${NZ.formatPrice(v.price)}</span>
+            <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();openVideo('${v.id}')">▶ Watch</button>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function openVideo(id) {
+      const v = NZ.getProductById(id);
+      if (!v) return;
+      const session = NZ.getSession();
+      if (v.price > 0 && !NZ.hasPurchased(session?.id, id)) {
+        openPaymentModal(v);
+        return;
+      }
+      NZ.incrementDownload(id);
+      document.getElementById('modalVideoTitle').textContent = v.name;
+      let playerHtml = '';
+      const ytId = getYouTubeId(v.fileUrl);
+      if (ytId) {
+        playerHtml = `<div class="video-embed"><iframe src="https://www.youtube.com/embed/${ytId}?autoplay=1" frameborder="0" allowfullscreen allow="autoplay"></iframe></div>`;
+      } else if (v.fileData) {
+        playerHtml = `<video controls autoplay style="width:100%;border-radius:8px;max-height:420px;"><source src="${v.fileData}"><p>Your browser does not support video.</p></video>`;
+      } else if (v.fileUrl && v.fileUrl !== '#') {
+        playerHtml = `<div class="video-embed"><iframe src="${v.fileUrl}" frameborder="0" allowfullscreen></iframe></div>`;
+      } else {
+        playerHtml = `<div class="empty-state"><div class="empty-icon">🎬</div><h3>Video not available</h3></div>`;
+      }
+      document.getElementById('modalVideoBody').innerHTML = `
+        ${playerHtml}
+        <div style="margin-top:16px;">
+          <h3 style="font-family:var(--font-heading);color:var(--color-primary);margin-bottom:8px;">${NZ.sanitize(v.name)}</h3>
+          <p style="color:var(--color-text-muted);line-height:1.6;">${NZ.sanitize(v.description || '')}</p>
+        </div>`;
+      document.getElementById('videoModal').classList.remove('hidden');
+    }
+
+    document.getElementById('closeVideoModal').addEventListener('click', () => {
+      document.getElementById('videoModal').classList.add('hidden');
+      document.getElementById('modalVideoBody').innerHTML = '';
+    });
+    document.getElementById('videoModal').addEventListener('click', e => {
+      if (e.target === document.getElementById('videoModal')) {
+        document.getElementById('videoModal').classList.add('hidden');
+        document.getElementById('modalVideoBody').innerHTML = '';
+      }
+    });
+
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        currentFilter = this.dataset.filter;
+        applyFilters();
+      });
+    });
+    document.getElementById('searchInput').addEventListener('input', applyFilters);
+    function applyFilters() {
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      let vids = allVideos;
+      if (currentFilter === 'free') vids = vids.filter(v => v.price === 0);
+      if (currentFilter === 'paid') vids = vids.filter(v => v.price > 0);
+      if (q) vids = vids.filter(v => v.name.toLowerCase().includes(q) || (v.description || '').toLowerCase().includes(q));
+      renderVideos(vids);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      allVideos = NZ.getProducts('video');
+      renderVideos(allVideos);
+    });
+  </script>
+</body>
+</html>

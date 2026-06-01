@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="gamer">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3x3 Sliding Puzzle — NihalZone</title>
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    .game-container { max-width: 500px; margin: 0 auto; padding: 20px; background: var(--bg-card); border: 1px solid var(--color-border); border-radius: 16px; box-shadow: var(--glow-primary); text-align: center; }
+    .puzzle-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; background: var(--bg-secondary); padding: 4px; border-radius: 8px; margin: 20px auto; width: 300px; height: 300px; border: 2px solid var(--color-border); }
+    .puzzle-tile { display: flex; align-items: center; justify-content: center; background: var(--gradient-primary); color: white; font-family: var(--font-heading); font-size: 2rem; font-weight: 900; border-radius: 4px; cursor: pointer; user-select: none; transition: transform 0.1s; }
+    .puzzle-tile:active { transform: scale(0.95); }
+    .puzzle-empty { background: transparent; cursor: default; }
+    .stats { display: flex; justify-content: space-between; font-family: var(--font-heading); font-size: 1rem; color: var(--color-primary); margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand"><div class="logo-icon">⚡</div>NIHALZONE</a>
+    <ul class="navbar-nav">
+      <li><a href="index.html" class="nav-link">🏠 Home</a></li>
+      <li><a href="online_games.html" class="nav-link active">🕹 Play Online</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <div class="theme-toggle">
+        <button class="theme-btn active" data-theme="gamer">🎮</button>
+        <button class="theme-btn" data-theme="hacker">💻</button>
+        <button class="theme-btn" data-theme="light">☀️</button>
+      </div>
+      <a href="online_games.html" class="btn btn-outline btn-sm">Back</a>
+    </div>
+  </nav>
+
+  <div class="page-wrapper">
+    <div class="container" style="padding-top:40px;padding-bottom:80px;">
+      <div class="game-container">
+        <h2 style="margin-bottom:10px;color:var(--color-primary);text-shadow:var(--glow-primary);font-family:var(--font-heading);">3x3 SLIDING PUZZLE</h2>
+        <p style="color:var(--color-text-muted);margin-bottom:20px;">Arrange the numbers 1-8 in order.</p>
+        
+        <div class="stats">
+          <div>Moves: <span id="moveCount">0</span></div>
+          <div>Time: <span id="timeCount">0s</span></div>
+        </div>
+
+        <div class="puzzle-grid" id="puzzleGrid"></div>
+
+        <div style="margin-top:20px;">
+          <button class="btn btn-primary" onclick="initGame()">🔄 Restart Game</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/core.js"></script>
+  <script>
+    NZ.initTheme();
+
+    let grid = [];
+    let emptyIdx = 8;
+    let moves = 0;
+    let timer = 0;
+    let interval = null;
+    let isPlaying = false;
+
+    function initGame() {
+      // 0 represents empty space
+      grid = [1, 2, 3, 4, 5, 6, 7, 8, 0];
+      moves = 0;
+      timer = 0;
+      isPlaying = true;
+      document.getElementById('moveCount').textContent = moves;
+      document.getElementById('timeCount').textContent = timer + 's';
+      clearInterval(interval);
+      interval = setInterval(() => {
+        if(isPlaying) {
+          timer++;
+          document.getElementById('timeCount').textContent = timer + 's';
+        }
+      }, 1000);
+      
+      shuffle();
+      render();
+    }
+
+    function shuffle() {
+      for(let i = 0; i < 100; i++) {
+        const neighbors = getNeighbors(emptyIdx);
+        const rand = neighbors[Math.floor(Math.random() * neighbors.length)];
+        swap(emptyIdx, rand);
+        emptyIdx = rand;
+      }
+    }
+
+    function getNeighbors(idx) {
+      const neighbors = [];
+      const row = Math.floor(idx / 3);
+      const col = idx % 3;
+      if (row > 0) neighbors.push(idx - 3); // top
+      if (row < 2) neighbors.push(idx + 3); // bottom
+      if (col > 0) neighbors.push(idx - 1); // left
+      if (col < 2) neighbors.push(idx + 1); // right
+      return neighbors;
+    }
+
+    function swap(i, j) {
+      [grid[i], grid[j]] = [grid[j], grid[i]];
+    }
+
+    function handleTileClick(idx) {
+      if (!isPlaying) return;
+      const neighbors = getNeighbors(emptyIdx);
+      if (neighbors.includes(idx)) {
+        swap(emptyIdx, idx);
+        emptyIdx = idx;
+        moves++;
+        document.getElementById('moveCount').textContent = moves;
+        render();
+        checkWin();
+      }
+    }
+
+    function checkWin() {
+      const winState = [1, 2, 3, 4, 5, 6, 7, 8, 0];
+      if (grid.every((val, i) => val === winState[i])) {
+        isPlaying = false;
+        clearInterval(interval);
+        setTimeout(() => alert(`You win!\nMoves: ${moves}\nTime: ${timer}s`), 100);
+      }
+    }
+
+    function render() {
+      const el = document.getElementById('puzzleGrid');
+      el.innerHTML = grid.map((val, i) => {
+        if (val === 0) return `<div class="puzzle-tile puzzle-empty"></div>`;
+        return `<div class="puzzle-tile" onclick="handleTileClick(${i})">${val}</div>`;
+      }).join('');
+    }
+
+    initGame();
+  </script>
+</body>
+</html>

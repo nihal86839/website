@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="gamer">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Songs — NihalZone</title>
+  <meta name="description" content="Listen to exclusive gaming and cyberpunk music on NihalZone.">
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    .song-card { background: var(--bg-card); border: 1px solid var(--color-border); border-radius: 12px; padding: 0; overflow: hidden; transition: all 0.3s ease; }
+    .song-card:hover { border-color: var(--color-border-bright); box-shadow: var(--glow-primary); transform: translateY(-3px); }
+    .song-header { display: flex; align-items: center; gap: 16px; padding: 16px; }
+    .song-cover { width: 64px; height: 64px; border-radius: 10px; object-fit: cover; flex-shrink: 0; background: var(--bg-card-hover); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; }
+    .song-cover img { width: 64px; height: 64px; border-radius: 10px; object-fit: cover; }
+    .song-info { flex: 1; min-width: 0; }
+    .song-title { font-family: var(--font-heading); font-size: 0.9rem; font-weight: 700; color: var(--color-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .song-artist { font-size: 0.75rem; color: var(--color-text-muted); margin-top: 2px; }
+    .song-player { padding: 0 16px 16px; }
+    .now-playing { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-family: var(--font-heading); font-size: 0.7rem; color: var(--color-primary); letter-spacing: 0.1em; }
+    .equalizer { display: flex; gap: 2px; align-items: flex-end; height: 16px; }
+    .bar { width: 3px; background: var(--color-primary); border-radius: 2px; animation: eq-bounce 0.8s infinite alternate; }
+    .bar:nth-child(2) { animation-delay: 0.2s; }
+    .bar:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes eq-bounce { from { height: 4px; } to { height: 16px; } }
+  </style>
+</head>
+<body>
+  <canvas id="matrixCanvas" class="matrix-canvas"></canvas>
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand"><div class="logo-icon">⚡</div>NIHALZONE</a>
+    <ul class="navbar-nav">
+      <li><a href="index.html" class="nav-link">🏠 Home</a></li>
+      <li><a href="games.html" class="nav-link">🎮 Games</a>
+    <a href="online_games.html" class="nav-link">🕹 Play Online</a></li>
+      <li><a href="online_games.html" class="nav-link">🕹 Play Online</a></li>
+      <li><a href="tools.html" class="nav-link">🔧 Tools</a></li>
+      <li><a href="terminal.html" class="nav-link">💻 Terminal</a></li>
+      <li><a href="videos.html" class="nav-link">🎬 Videos</a></li>
+      <li><a href="photos.html" class="nav-link">🖼 Photos</a></li>
+      <li><a href="songs.html" class="nav-link active">🎵 Songs</a></li>
+      <li><a href="chat.html" class="nav-link">💬 Chat</a></li>
+      <li data-admin="true" class="hidden"><a href="admin.html" class="nav-link neon-text-secondary">⚙ Admin</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <div class="theme-toggle">
+        <button class="theme-btn" data-theme="gamer">🎮</button>
+        <button class="theme-btn" data-theme="hacker">💻</button>
+        <button class="theme-btn" data-theme="light">☀️</button>
+      </div>
+      <a href="login.html" class="btn btn-outline btn-sm" data-auth="false">Login</a>
+      <a href="signup.html" class="btn btn-primary btn-sm" data-auth="false">Sign Up</a>
+      <div data-auth="true" class="hidden" style="display:flex;align-items:center;gap:8px;">
+        <div class="user-dropdown-container" id="profileDropdownContainer">
+          <div style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:4px;" id="profileDropdownToggle">
+            <div class="user-avatar" id="navUserAvatar" style="width:32px;height:32px;font-size:0.8rem;border-radius:8px;background:var(--gradient-primary);display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;overflow:hidden;">U</div>
+            <span id="navUserName" style="font-family:var(--font-heading);font-size:0.75rem;"></span>
+            <span>▼</span>
+          </div>
+          <div class="user-dropdown-menu">
+            <button class="dropdown-item" onclick="openProfileModal()">⚙️ Edit Profile</button>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item" data-action="logout" style="color:var(--color-secondary);">🚪 Logout</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+  </nav>
+  <div class="mobile-nav" id="mobileNav">
+    <a href="index.html" class="nav-link">🏠 Home</a>
+    <a href="songs.html" class="nav-link">🎵 Songs</a>
+    <a href="chat.html" class="nav-link">💬 Chat</a>
+    <div style="display:flex;gap:10px;margin-top:8px;">
+      <a href="login.html" class="btn btn-outline btn-sm" data-auth="false">Login</a>
+      <button class="btn btn-outline btn-sm" data-action="logout" data-auth="true">Logout</button>
+    </div>
+  </div>
+
+  <div class="page-wrapper">
+    <div class="grid-bg"></div>
+    <div class="page-header">
+      <h1>🎵 MUSIC</h1>
+      <p>Gaming beats, cyberpunk tracks and exclusive music. Listen in your browser.</p>
+    </div>
+    <div class="container" style="padding-bottom:80px;">
+      <div class="filter-bar">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="free">🆓 Free</button>
+        <button class="filter-btn" data-filter="paid">💎 Premium</button>
+        <div class="search-bar">
+          <input type="text" class="search-input" id="searchInput" placeholder="🔍 Search songs...">
+        </div>
+      </div>
+
+      <div class="grid grid-auto" id="songsGrid" style="margin-top:10px;"></div>
+      <div id="emptyState" class="empty-state hidden">
+        <div class="empty-icon">🎵</div>
+        <h3>No songs yet</h3>
+        <p>Admin hasn't uploaded any music yet.</p>
+      </div>
+    </div>
+  </div>
+
+  <button class="donate-btn" id="donateBtn">💛 <span>Donate</span></button>
+  <div style="position:fixed;bottom:80px;right:24px;z-index:500;">
+    <button class="btn btn-outline btn-sm" id="supportBtn" style="border-radius:20px;">🎧 Support</button>
+  </div>
+
+  <script src="js/core.js"></script>
+  <script>
+    let allSongs = [];
+    let currentFilter = 'all';
+    let currentAudio = null;
+    let currentPlayingId = null;
+
+    function renderSongs(songs) {
+      const grid = document.getElementById('songsGrid');
+      const empty = document.getElementById('emptyState');
+      if (!songs.length) { grid.innerHTML = ''; empty.classList.remove('hidden'); return; }
+      empty.classList.add('hidden');
+      grid.innerHTML = songs.map(s => `
+        <div class="song-card" id="songCard_${s.id}">
+          <div class="song-header">
+            <div class="song-cover">
+              ${s.imageUrl
+                ? `<img src="${s.imageUrl}" alt="${NZ.sanitize(s.name)}" onerror="this.outerHTML='<span>🎵</span>'">`
+                : '🎵'}
+            </div>
+            <div class="song-info">
+              <div class="song-title">${NZ.sanitize(s.name)}</div>
+              <div class="song-artist">${NZ.sanitize(s.description || 'NihalZone Music')}</div>
+              <div style="display:flex;gap:6px;margin-top:6px;">
+                <span class="badge ${s.price > 0 ? 'badge-warning' : 'badge-success'}">${NZ.formatPrice(s.price)}</span>
+                <span class="badge badge-info">⬇ ${s.downloads || 0}</span>
+              </div>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="togglePlay('${s.id}')" id="playBtn_${s.id}">▶</button>
+          </div>
+          <div class="song-player" id="songPlayer_${s.id}" style="display:none;">
+            <div class="now-playing">
+              <div class="equalizer"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
+              NOW PLAYING
+            </div>
+            <div id="audioContainer_${s.id}"></div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function togglePlay(id) {
+      const s = NZ.getProductById(id);
+      if (!s) return;
+
+      const session = NZ.getSession();
+      if (s.price > 0 && !NZ.hasPurchased(session?.id, id)) {
+        openPaymentModal(s);
+        return;
+      }
+
+      // Stop current
+      if (currentPlayingId && currentPlayingId !== id) {
+        stopSong(currentPlayingId);
+      }
+
+      const playerDiv = document.getElementById('songPlayer_' + id);
+      const playBtn = document.getElementById('playBtn_' + id);
+      const audioContainer = document.getElementById('audioContainer_' + id);
+
+      if (currentPlayingId === id) {
+        stopSong(id);
+        return;
+      }
+
+      // Play this song
+      currentPlayingId = id;
+      NZ.incrementDownload(id);
+
+      let src = s.fileData || s.fileUrl;
+      if (!src || src === '#') {
+        showToast('Audio file not available yet.', 'info');
+        return;
+      }
+
+      playerDiv.style.display = 'block';
+      playBtn.textContent = '⏹';
+      playBtn.style.background = 'linear-gradient(135deg,#ff006e,#9d00ff)';
+
+      audioContainer.innerHTML = `<audio controls autoplay class="audio-player" style="width:100%;" onended="stopSong('${id}')">
+        <source src="${src}">
+        Your browser does not support audio.
+      </audio>`;
+
+      currentAudio = audioContainer.querySelector('audio');
+    }
+
+    function stopSong(id) {
+      const playerDiv = document.getElementById('songPlayer_' + id);
+      const playBtn = document.getElementById('playBtn_' + id);
+      const audioContainer = document.getElementById('audioContainer_' + id);
+      if (playerDiv) playerDiv.style.display = 'none';
+      if (playBtn) { playBtn.textContent = '▶'; playBtn.style.background = ''; }
+      if (audioContainer) audioContainer.innerHTML = '';
+      if (currentPlayingId === id) currentPlayingId = null;
+      currentAudio = null;
+    }
+
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        currentFilter = this.dataset.filter;
+        applyFilters();
+      });
+    });
+
+    document.getElementById('searchInput').addEventListener('input', applyFilters);
+
+    function applyFilters() {
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      let songs = allSongs;
+      if (currentFilter === 'free') songs = songs.filter(s => s.price === 0);
+      if (currentFilter === 'paid') songs = songs.filter(s => s.price > 0);
+      if (q) songs = songs.filter(s => s.name.toLowerCase().includes(q));
+      renderSongs(songs);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      allSongs = NZ.getProducts('song');
+      renderSongs(allSongs);
+    });
+  </script>
+</body>
+</html>

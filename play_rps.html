@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="gamer">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rock Paper Scissors — NihalZone</title>
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    .game-container { max-width: 600px; margin: 0 auto; padding: 30px; background: var(--bg-card); border: 1px solid var(--color-border); border-radius: 16px; box-shadow: var(--glow-primary); text-align: center; }
+    .score-board { display: flex; justify-content: space-around; align-items: center; margin: 20px 0 40px; padding: 16px; background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px solid var(--color-border); }
+    .score-box { font-family: var(--font-heading); }
+    .score-title { font-size: 0.8rem; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
+    .score-val { font-size: 2.5rem; color: var(--color-primary); text-shadow: var(--glow-primary); }
+    .choices { display: flex; justify-content: center; gap: 20px; margin-bottom: 30px; }
+    .choice-btn { width: 100px; height: 100px; border-radius: 50%; background: var(--bg-secondary); border: 3px solid var(--color-border); font-size: 3rem; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s; }
+    .choice-btn:hover { background: var(--bg-card-hover); border-color: var(--color-primary); box-shadow: var(--glow-primary); transform: scale(1.1); }
+    .choice-btn:active { transform: scale(0.95); }
+    .result-text { font-family: var(--font-heading); font-size: 1.5rem; color: var(--color-text); margin-bottom: 20px; min-height: 2em; }
+    .battle-area { display: flex; justify-content: center; align-items: center; gap: 40px; margin-bottom: 30px; min-height: 120px; }
+    .fighter { font-size: 4rem; opacity: 0.3; transition: all 0.3s; transform: scale(0.8); }
+    .fighter.active { opacity: 1; transform: scale(1.2); filter: drop-shadow(0 0 10px var(--color-primary)); }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand"><div class="logo-icon">⚡</div>NIHALZONE</a>
+    <ul class="navbar-nav">
+      <li><a href="index.html" class="nav-link">🏠 Home</a></li>
+      <li><a href="online_games.html" class="nav-link active">🕹 Play Online</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <div class="theme-toggle">
+        <button class="theme-btn active" data-theme="gamer">🎮</button>
+        <button class="theme-btn" data-theme="hacker">💻</button>
+        <button class="theme-btn" data-theme="light">☀️</button>
+      </div>
+      <a href="online_games.html" class="btn btn-outline btn-sm">Back</a>
+    </div>
+  </nav>
+
+  <div class="page-wrapper">
+    <div class="container" style="padding-top:40px;padding-bottom:80px;">
+      <div class="game-container">
+        <h2 style="color:var(--color-primary);text-shadow:var(--glow-primary);font-family:var(--font-heading);">ROCK PAPER SCISSORS</h2>
+        
+        <div class="score-board">
+          <div class="score-box">
+            <div class="score-title">You</div>
+            <div class="score-val" id="playerScore">0</div>
+          </div>
+          <div class="score-box">
+            <div class="score-title">Draws</div>
+            <div class="score-val" id="drawScore" style="color:var(--color-text-muted);font-size:1.5rem;margin-top:10px;">0</div>
+          </div>
+          <div class="score-box">
+            <div class="score-title">AI</div>
+            <div class="score-val" id="aiScore" style="color:var(--color-secondary);">0</div>
+          </div>
+        </div>
+
+        <div class="battle-area">
+          <div class="fighter" id="playerFighter">❓</div>
+          <div style="font-family:var(--font-heading);color:var(--color-text-muted);font-weight:bold;">VS</div>
+          <div class="fighter" id="aiFighter">❓</div>
+        </div>
+
+        <div class="result-text" id="resultText">Choose your weapon!</div>
+
+        <div class="choices">
+          <button class="choice-btn" onclick="play('rock')">✊</button>
+          <button class="choice-btn" onclick="play('paper')">✋</button>
+          <button class="choice-btn" onclick="play('scissors')">✌️</button>
+        </div>
+        
+        <button class="btn btn-outline btn-sm" onclick="resetScore()">Reset Score</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/core.js"></script>
+  <script>
+    NZ.initTheme();
+
+    let pScore = 0;
+    let aScore = 0;
+    let dScore = 0;
+
+    const emojis = { rock: '✊', paper: '✋', scissors: '✌️' };
+    const choices = ['rock', 'paper', 'scissors'];
+
+    function play(playerChoice) {
+      const aiChoice = choices[Math.floor(Math.random() * 3)];
+      
+      const pFighter = document.getElementById('playerFighter');
+      const aFighter = document.getElementById('aiFighter');
+      const resText = document.getElementById('resultText');
+
+      pFighter.textContent = emojis[playerChoice];
+      aFighter.textContent = emojis[aiChoice];
+      pFighter.classList.add('active');
+      aFighter.classList.add('active');
+
+      setTimeout(() => { pFighter.classList.remove('active'); aFighter.classList.remove('active'); }, 1000);
+
+      if (playerChoice === aiChoice) {
+        dScore++;
+        resText.textContent = "It's a Draw!";
+        resText.style.color = 'var(--color-text-muted)';
+      } else if (
+        (playerChoice === 'rock' && aiChoice === 'scissors') ||
+        (playerChoice === 'paper' && aiChoice === 'rock') ||
+        (playerChoice === 'scissors' && aiChoice === 'paper')
+      ) {
+        pScore++;
+        resText.textContent = "You Win! 🎉";
+        resText.style.color = '#00ff88';
+      } else {
+        aScore++;
+        resText.textContent = "AI Wins! 💀";
+        resText.style.color = '#ff0040';
+      }
+
+      document.getElementById('playerScore').textContent = pScore;
+      document.getElementById('aiScore').textContent = aScore;
+      document.getElementById('drawScore').textContent = dScore;
+    }
+
+    function resetScore() {
+      pScore = 0; aScore = 0; dScore = 0;
+      document.getElementById('playerScore').textContent = '0';
+      document.getElementById('aiScore').textContent = '0';
+      document.getElementById('drawScore').textContent = '0';
+      document.getElementById('resultText').textContent = 'Choose your weapon!';
+      document.getElementById('playerFighter').textContent = '❓';
+      document.getElementById('aiFighter').textContent = '❓';
+    }
+  </script>
+</body>
+</html>
